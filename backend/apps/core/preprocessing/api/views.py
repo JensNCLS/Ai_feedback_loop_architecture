@@ -5,6 +5,7 @@ import os
 from django.conf import settings
 from ....models.model_loader import analyze_image
 
+#python manage.py runserver
 
 @csrf_exempt  # For simplicity, disable CSRF token checks for now
 def upload_image(request):
