@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -54,6 +55,10 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React frontend
 ]
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Directory for storing uploaded images
+MEDIA_URL = '/media/'  # URL path to access media files
+
 
 ROOT_URLCONF = 'backend.urls'
 
