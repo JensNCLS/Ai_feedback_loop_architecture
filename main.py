@@ -2,7 +2,7 @@ import torch
 from pathlib import Path
 
 # Path to your custom-trained .pt file
-model_path = 'src/models/best.pt'
+model_path = 'src/ai_models/best.pt'
 
 # Load your custom YOLOv5 model
 model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_path, force_reload=True)

@@ -1,26 +1,27 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.core.files.storage import default_storage
-import os
-from django.conf import settings
-from ....models.model_loader import analyze_image
-
-#python manage.py runserver
+from ..models import PreprocessedImage
+from django.shortcuts import render
+from ...analysis.tasks import analyze_image
 
 @csrf_exempt  # For simplicity, disable CSRF token checks for now
 def upload_image(request):
     if request.method == 'POST' and 'image' in request.FILES:
         image_file = request.FILES['image']
 
-        # Save the uploaded image to the media directory
-        file_path = os.path.join(settings.MEDIA_ROOT, image_file.name)
-        path = default_storage.save(file_path, image_file)
-        relative_url = os.path.join(settings.MEDIA_URL, image_file.name)  # Relative URL for frontend
+        # Convert uploaded image file to binary format
+        image_binary = image_file.read()
 
-        # Pass the image to the model for analysis
-        results = analyze_image(image_file)  # Your function to analyze the image
+        # Save the image to the database
+        preprocessed_image = PreprocessedImage.objects.create(image=image_binary)
 
-        # Return the results and image URL as JSON
-        return JsonResponse({'predictions': results, 'image_url': relative_url})
+        analyze_image.delay(preprocessed_image.id)
+
+        # Return the results and image ID as JSON (or you can return the URL if you want)
+        return JsonResponse({
+            'success': True,
+            'message': 'Image successfully uploaded and analysis started!',
+            'image_id': preprocessed_image.id
+        })
 
     return JsonResponse({'error': 'No image provided'}, status=400)
