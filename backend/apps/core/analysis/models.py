@@ -7,7 +7,7 @@ class AnalyzedImage(models.Model):
         on_delete=models.CASCADE,
         related_name="analyzed_image"
     )
-    analysis_results = models.JSONField(null=True, blank=True)  # Store predictions in a structured way
+    analysis_results = models.JSONField(null=True, blank=True)
     analyzed_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

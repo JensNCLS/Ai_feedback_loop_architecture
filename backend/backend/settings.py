@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'apps.core.preprocessing',
     'apps.core.analysis',
     'apps.core',
+    'apps.ai_models',
     'backend',
 ]
 
@@ -102,12 +103,6 @@ DATABASES = {
     }
 }
 
-# Celery Configuration
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
