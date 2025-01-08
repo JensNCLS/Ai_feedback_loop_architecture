@@ -1,27 +1,34 @@
 import React, { useState, useRef } from 'react';
 
 function ImageUpload() {
-  const [image, setImage] = useState(null);
-  const [predictions, setPredictions] = useState([]);  // Store predictions here
-  const [imageUrl, setImageUrl] = useState('');  // Store image URL here
-  const imgRef = useRef(null);  // Reference for the image element
+  const [image, setImage] = useState(null); // Track uploaded image
+  const [predictions, setPredictions] = useState([]); // Track predictions
+  const [imageUrl, setImageUrl] = useState(''); // Track image preview URL
+  const [error, setError] = useState(''); // Track errors
+  const imgRef = useRef(null); // Reference to the image element
 
+  // Handle image selection
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setImage(file);
-    setImageUrl(URL.createObjectURL(file));  // Create object URL for image preview
+    if (file) {
+      setImage(file);
+      setImageUrl(URL.createObjectURL(file)); // Create object URL for image preview
+      setPredictions([]); // Clear previous predictions
+      setError(''); // Clear any error
+    }
   };
 
+  // Submit image to backend for analysis
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!image) {
-      alert("Please select an image");
+      setError('Please select an image to upload.');
       return;
     }
 
     const formData = new FormData();
-    formData.append("image", image);
+    formData.append('image', image);
 
     try {
       const response = await fetch('/api/upload/', {
@@ -31,17 +38,21 @@ function ImageUpload() {
 
       if (response.ok) {
         const data = await response.json();
-        setPredictions(data.predictions);  // Set the predictions from backend response
+        console.log('Backend response:', data);
+        setPredictions(data.analysis_results || []); // Set predictions if available
+        setError(''); // Clear error message
       } else {
-        alert("Failed to upload image");
+        const errorMessage = `Failed to upload image. Status: ${response.status}`;
+        console.error(errorMessage);
+        setError(errorMessage);
       }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("An error occurred while uploading the image");
+    } catch (err) {
+      console.error('Error during upload:', err);
+      setError('An error occurred while uploading the image.');
     }
   };
 
-  // Get the scaled image dimensions after loading
+  // Get the scaled image dimensions
   const getScaledImageDimensions = () => {
     const imgElement = imgRef.current;
     if (imgElement) {
@@ -56,69 +67,155 @@ function ImageUpload() {
   };
 
   return (
-    <div>
-      <h1>Upload an Image</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-        />
-        <button type="submit">Upload</button>
-      </form>
-
-      {/* Display uploaded image */}
-      {imageUrl && (
-        <div
-          style={{
-            position: 'relative',
-            display: 'inline-block',
-            width: '100%',
-            maxWidth: '800px',
-            height: 'auto',
-          }}
-        >
-          <img
-            ref={imgRef}
-            src={imageUrl}
-            alt="Uploaded"
+    <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
+      {/* Sidebar for Image Upload and Predictions */}
+      <div
+        style={{
+          width: '300px',
+          backgroundColor: '#2c3e50',
+          color: 'white',
+          padding: '20px',
+          overflowY: 'auto',
+          boxShadow: '2px 0 5px rgba(0, 0, 0, 0.1)',
+          borderRight: '2px solid #34495e',
+        }}
+      >
+        <h1 style={{ fontSize: '24px', marginBottom: '20px' }}>Upload an Image</h1>
+        <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
             style={{
+              marginBottom: '10px',
+              padding: '10px',
+              borderRadius: '5px',
+              border: '1px solid #bdc3c7',
               width: '100%',
-              height: 'auto',
-              display: 'block',
+              fontSize: '16px',
             }}
           />
+          <div>
+            <button
+              type="submit"
+              style={{
+                padding: '10px 15px',
+                backgroundColor: '#3498db',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                width: '100%',
+                fontSize: '16px',
+                marginTop: '10px',
+              }}
+            >
+              Upload
+            </button>
+          </div>
+        </form>
 
-          {/* Overlay bounding boxes */}
-          {predictions.map((pred, index) => {
-            const { naturalWidth, naturalHeight } = getScaledImageDimensions();
+        {/* Display error messages */}
+        {error && <p style={{ color: 'red', fontSize: '14px' }}>{error}</p>}
 
-            return (
-              <div
-                key={index}
-                style={{
-                  position: 'absolute',
-                  left: `${(pred.xmin / naturalWidth) * 100}%`,
-                  top: `${(pred.ymin / naturalHeight) * 100}%`,
-                  width: `${((pred.xmax - pred.xmin) / naturalWidth) * 100}%`,
-                  height: `${((pred.ymax - pred.ymin) / naturalHeight) * 100}%`,
-                  border: '2px solid red',
-                  color: 'red',
-                  fontWeight: 'bold',
-                  padding: '5px',
-                  backgroundColor: 'rgba(255, 0, 0, 0.5)',
-                  pointerEvents: 'none',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                {pred.name} ({(pred.confidence * 100).toFixed(2)}%)
-              </div>
-            );
-          })}
-        </div>
-      )}
+        {/* Only show predictions if there are any */}
+        {imageUrl && predictions.length > 0 ? (
+          <div style={{ marginTop: '20px' }}>
+            <h2 style={{ fontSize: '20px', marginBottom: '10px' }}>Predictions:</h2>
+            <ul style={{ paddingLeft: '20px' }}>
+              {predictions.map((pred, index) => (
+                <li key={index} style={{ fontSize: '16px', marginBottom: '8px' }}>
+                  {pred.name}: {(pred.confidence * 100).toFixed(2)}%
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          imageUrl && <p style={{ color: '#95a5a6' }}>No predictions available.</p> // Message when no predictions are available
+        )}
+      </div>
+
+      {/* Main Area for Image Display */}
+      <div
+        style={{
+          flex: 1,
+          padding: '20px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#ecf0f1',
+        }}
+      >
+        {/* Display uploaded image */}
+        {imageUrl && (
+          <div
+            style={{
+              position: 'relative',
+              display: 'inline-block',
+              width: '100%',
+              maxWidth: '800px',
+              height: 'auto',
+              border: '2px solid #bdc3c7',
+              borderRadius: '10px',
+              backgroundColor: 'white',
+              boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+              padding: '10px',
+            }}
+          >
+            <img
+              ref={imgRef}
+              src={imageUrl}
+              alt="Uploaded"
+              style={{
+                width: '100%',
+                height: 'auto',
+                display: 'block',
+                borderRadius: '10px',
+              }}
+            />
+
+            {/* Overlay bounding boxes for predictions */}
+            {predictions.length > 0 &&
+              predictions.map((pred, index) => {
+                const { width, height, naturalWidth, naturalHeight } =
+                  getScaledImageDimensions();
+
+                const scaleX = width / naturalWidth;
+                const scaleY = height / naturalHeight;
+
+                return (
+                  <div
+                    key={index}
+                    style={{
+                      position: 'absolute',
+                      left: `${pred.xmin * scaleX}px`,
+                      top: `${pred.ymin * scaleY}px`,
+                      width: `${(pred.xmax - pred.xmin) * scaleX}px`,
+                      height: `${(pred.ymax - pred.ymin) * scaleY}px`,
+                      border: '2px solid #e74c3c',
+                      backgroundColor: 'rgba(231, 76, 60, 0.5)',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        color: 'white',
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        padding: '2px 4px',
+                        fontSize: '12px',
+                      }}
+                    >
+                      {pred.name} ({(pred.confidence * 100).toFixed(2)}%)
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
