@@ -153,7 +153,7 @@ function ImageUpload() {
               position: 'relative',
               display: 'inline-block',
               width: '100%',
-              maxWidth: '800px',
+              maxWidth: '1100px',
               height: 'auto',
               border: '2px solid #bdc3c7',
               borderRadius: '10px',
