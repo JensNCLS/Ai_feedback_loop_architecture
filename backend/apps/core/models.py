@@ -25,12 +25,12 @@ class FeedbackImage(models.Model):
     preprocessed_image = models.ForeignKey(
         'PreprocessedImage',
         on_delete=models.CASCADE,
-        related_name='feedback_image'
+        related_name='feedback_images'
     )
     analyzed_image = models.ForeignKey(
         'AnalyzedImage',
         on_delete=models.CASCADE,
-        related_name='feedback_image',
+        related_name='feedback_images',
         null=True, blank=True
     )
     feedback_data = models.JSONField()

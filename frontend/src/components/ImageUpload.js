@@ -7,6 +7,7 @@ function ImageUpload() {
   const [imageUrl, setImageUrl] = useState('');
   const [error, setError] = useState('');
   const [preprocessedImageId, setPreprocessedImageId] = useState(null);
+  const [analyzedImageId, setAnalyzedImageId] = useState(null);
   const [analysisStatus, setAnalysisStatus] = useState('');
   const imgRef = useRef(null);
 
@@ -19,6 +20,7 @@ function ImageUpload() {
       setError('');
       setPreprocessedImageId(null);
       setAnalysisStatus('');
+      setAnalyzedImageId(null);
     }
   };
 
@@ -69,6 +71,7 @@ function ImageUpload() {
         if (data.success) {
           if (data.status === 'completed') {
             setPredictions(data.analysis_results || []);
+            setAnalyzedImageId(data.analyzed_image_id);
             setAnalysisStatus('completed');
             clearInterval(intervalId);
           } else {
@@ -160,7 +163,7 @@ function ImageUpload() {
             </ul>
           </div>
         ) : (
-          imageUrl && <p style={{ color: '#95a5a6' }}>No predictions available.</p> // Message when no predictions are available
+          imageUrl && <p style={{ color: '#95a5a6' }}>No predictions available.</p>
         )}
       </div>
 
@@ -242,9 +245,13 @@ function ImageUpload() {
           </div>
         )}
       </div>
-      {predictions.length > 0 && (
-        <FeedbackCommit predictions={predictions} />
-      )}
+      {analysisStatus === 'completed' && predictions.length > 0 && (
+          <FeedbackCommit
+            predictions={predictions}
+            preprocessedImageId={preprocessedImageId}
+            analyzedImageId={analyzedImageId}
+          />
+        )}
     </div>
   );
 }

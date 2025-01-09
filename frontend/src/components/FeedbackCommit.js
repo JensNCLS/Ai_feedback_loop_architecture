@@ -1,30 +1,31 @@
 import React, { useState } from 'react';
 
-function FeedbackCommit({ labeledImage, predictions }) {
+function FeedbackCommit({ predictions, preprocessedImageId, analyzedImageId }) {
   const [feedback, setFeedback] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   // Handle feedback submission
   const handleFeedbackSubmit = async () => {
-    if (!labeledImage || predictions.length === 0) {
-      setError('No labeled image or predictions available.');
+    if (!preprocessedImageId || predictions.length === 0) {
+      setError('No preprocessed image or predictions available.');
       return;
     }
 
-    const formData = new FormData();
-formData.append('labeled_image', labeledImage);
-formData.append('predictions', JSON.stringify(predictions));
-if (feedback) {
-  formData.append('feedback', feedback);
-}
-
-
     try {
       const response = await fetch('/api/feedback/', {
-        method: 'POST',
-        body: formData,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              preprocessed_image_id: preprocessedImageId,
+              predictions: predictions,
+              feedback: feedback,
+              analyzed_image_id: analyzedImageId,
+          }),
       });
+
 
       if (response.ok) {
         setSuccess('Feedback successfully submitted!');
