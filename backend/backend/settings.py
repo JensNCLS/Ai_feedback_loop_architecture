@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'apps.core.preprocessing',
     'apps.core.analysis',
+    'apps.core.feedback',
     'apps.core',
     'apps.ai_models',
     'backend',

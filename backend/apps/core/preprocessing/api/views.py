@@ -1,10 +1,12 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from ...analysis.models import AnalyzedImage
-from ..models import PreprocessedImage
-import requests
-import logging
+from ...models import PreprocessedImage
+from ...tasks import analyze_image
 
+#startup commands:
+#Django: python manage.py runserver
+#FastApi: uvicorn apps.ai_models.app:app --port 8001
+#React: npm start
 
 @csrf_exempt
 def upload_image(request):
@@ -12,35 +14,21 @@ def upload_image(request):
         try:
             image_file = request.FILES['image']
 
+            # Save the image to PreprocessedImage model as bytes
             preprocessed_image = PreprocessedImage.objects.create(
-                image=image_file.read(),
+                image=image_file.read(),  # Save file as binary data
                 original_filename=image_file.name
             )
 
-            image_file.seek(0)
-
-            files = {
-                "image": ("image.jpg", image_file, "image/jpeg")
-            }
-
-            url = "http://127.0.0.1:8001/predict/"
-            response = requests.post(url, files=files)
-            response.raise_for_status()
-
-            analysis_results = response.json().get("predictions", [])
-
-            analyzed_image = AnalyzedImage.objects.create(
-                preprocessed_image=preprocessed_image,
-                analysis_results=analysis_results
-            )
+            # Trigger analysis task
+            analyze_image(preprocessed_image.id)
 
             return JsonResponse({
                 "success": True,
-                "message": "Image successfully uploaded and analysis completed!",
-                "image_id": preprocessed_image.id,
-                "analysis_results": analysis_results,
-                "analyzed_image_id": analyzed_image.id
+                "message": "Image successfully uploaded and analysis started!",
+                "preprocessed_image_id": preprocessed_image.id
             })
+
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 

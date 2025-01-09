@@ -1,24 +1,27 @@
-import React, { useState, useRef } from 'react';
+import FeedbackCommit from "./FeedbackCommit";
+import React, { useState, useRef, useEffect } from 'react';
 
 function ImageUpload() {
-  const [image, setImage] = useState(null); // Track uploaded image
-  const [predictions, setPredictions] = useState([]); // Track predictions
-  const [imageUrl, setImageUrl] = useState(''); // Track image preview URL
-  const [error, setError] = useState(''); // Track errors
-  const imgRef = useRef(null); // Reference to the image element
+  const [image, setImage] = useState(null);
+  const [predictions, setPredictions] = useState([]);
+  const [imageUrl, setImageUrl] = useState('');
+  const [error, setError] = useState('');
+  const [preprocessedImageId, setPreprocessedImageId] = useState(null);
+  const [analysisStatus, setAnalysisStatus] = useState('');
+  const imgRef = useRef(null);
 
-  // Handle image selection
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImage(file);
-      setImageUrl(URL.createObjectURL(file)); // Create object URL for image preview
-      setPredictions([]); // Clear previous predictions
-      setError(''); // Clear any error
+      setImageUrl(URL.createObjectURL(file));
+      setPredictions([]);
+      setError('');
+      setPreprocessedImageId(null);
+      setAnalysisStatus('');
     }
   };
 
-  // Submit image to backend for analysis
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -39,8 +42,11 @@ function ImageUpload() {
       if (response.ok) {
         const data = await response.json();
         console.log('Backend response:', data);
-        setPredictions(data.analysis_results || []); // Set predictions if available
-        setError(''); // Clear error message
+
+        setPreprocessedImageId(data.preprocessed_image_id);
+        setAnalysisStatus('in_progress');
+
+        setError('');
       } else {
         const errorMessage = `Failed to upload image. Status: ${response.status}`;
         console.error(errorMessage);
@@ -52,7 +58,33 @@ function ImageUpload() {
     }
   };
 
-  // Get the scaled image dimensions
+  useEffect(() => {
+    if (!preprocessedImageId) return;
+
+    const intervalId = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/check_analysis_status/${preprocessedImageId}/`);
+        const data = await response.json();
+
+        if (data.success) {
+          if (data.status === 'completed') {
+            setPredictions(data.analysis_results || []);
+            setAnalysisStatus('completed');
+            clearInterval(intervalId);
+          } else {
+            setAnalysisStatus('in_progress');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking analysis status:', error);
+        setError('An error occurred while checking the analysis status.');
+        clearInterval(intervalId);
+      }
+    }, 500);
+
+    return () => clearInterval(intervalId);
+  }, [preprocessedImageId]);
+
   const getScaledImageDimensions = () => {
     const imgElement = imgRef.current;
     if (imgElement) {
@@ -68,7 +100,6 @@ function ImageUpload() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
-      {/* Sidebar for Image Upload and Predictions */}
       <div
         style={{
           width: '300px',
@@ -115,10 +146,8 @@ function ImageUpload() {
           </div>
         </form>
 
-        {/* Display error messages */}
         {error && <p style={{ color: 'red', fontSize: '14px' }}>{error}</p>}
 
-        {/* Only show predictions if there are any */}
         {imageUrl && predictions.length > 0 ? (
           <div style={{ marginTop: '20px' }}>
             <h2 style={{ fontSize: '20px', marginBottom: '10px' }}>Predictions:</h2>
@@ -135,7 +164,6 @@ function ImageUpload() {
         )}
       </div>
 
-      {/* Main Area for Image Display */}
       <div
         style={{
           flex: 1,
@@ -146,7 +174,6 @@ function ImageUpload() {
           backgroundColor: '#ecf0f1',
         }}
       >
-        {/* Display uploaded image */}
         {imageUrl && (
           <div
             style={{
@@ -174,7 +201,6 @@ function ImageUpload() {
               }}
             />
 
-            {/* Overlay bounding boxes for predictions */}
             {predictions.length > 0 &&
               predictions.map((pred, index) => {
                 const { width, height, naturalWidth, naturalHeight } =
@@ -216,6 +242,9 @@ function ImageUpload() {
           </div>
         )}
       </div>
+      {predictions.length > 0 && (
+        <FeedbackCommit predictions={predictions} />
+      )}
     </div>
   );
 }
