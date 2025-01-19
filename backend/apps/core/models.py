@@ -36,7 +36,25 @@ class FeedbackImage(models.Model):
     feedback_data = models.JSONField()
     feedback_text = models.TextField(blank=True, null=True)
     feedback_given_at = models.DateTimeField(auto_now_add=True)
+    retrained = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Feedback for Image {self.preprocessed_image.id}"
+
+class LogEntry(models.Model):
+    LEVEL_CHOICES = [
+        ('DEBUG', 'Debug'),
+        ('INFO', 'Info'),
+        ('WARNING', 'Warning'),
+        ('ERROR', 'Error'),
+        ('CRITICAL', 'Critical'),
+    ]
+
+    level = models.CharField(max_length=10, choices=LEVEL_CHOICES)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    module = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"[{self.timestamp}] {self.level}: {self.message}"
 

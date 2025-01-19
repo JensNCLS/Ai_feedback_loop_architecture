@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'apps.core.preprocessing',
     'apps.core.analysis',
     'apps.core.feedback',
+    'apps.core.retraining',
+    'apps.core.logging',
     'apps.core',
     'apps.ai_models',
     'backend',

@@ -3,7 +3,23 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from ...models import AnalyzedImage, PreprocessedImage, FeedbackImage
 from django.shortcuts import get_object_or_404
+from ...logging.logging import get_logger
 
+logger = get_logger()
+
+def log_method_call(func):
+    def wrapper(*args, **kwargs):
+        logger.info(f"Calling {func.__name__} with arguments: {args} and kwargs: {kwargs}")
+        try:
+            result = func(*args, **kwargs)
+            logger.info(f"Finished {func.__name__} with result: {result}")
+            return result
+        except Exception as e:
+            logger.error(f"Error in {func.__name__}: {e}")
+            raise
+    return wrapper
+
+@log_method_call
 def check_analysis_status(request, preprocessed_image_id):
     try:
         preprocessed_image = get_object_or_404(PreprocessedImage, id=preprocessed_image_id)
@@ -25,29 +41,25 @@ def check_analysis_status(request, preprocessed_image_id):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-
 @csrf_exempt
+@log_method_call
 def submit_feedback(request):
     if request.method == 'POST':
         try:
-            # Parse the incoming data from the frontend
             data = json.loads(request.body.decode('utf-8'))
             preprocessed_image_id = data.get('preprocessed_image_id')
-            predictions = data.get('predictions')  # Predictions should contain bounding boxes
-            feedback_text = data.get('feedback', '')  # Optional feedback text
-            analyzed_image_id = data.get('analyzed_image_id')  # Get the analyzed image ID
+            predictions = data.get('predictions')
+            feedback_text = data.get('feedback', '')
+            analyzed_image_id = data.get('analyzed_image_id')
 
-            # Check if the required data is present
             if not preprocessed_image_id or not predictions:
                 return JsonResponse({'error': 'Missing preprocessed image ID or predictions.'}, status=400)
 
-            # Retrieve the PreprocessedImage instance
             try:
                 preprocessed_image = PreprocessedImage.objects.get(id=preprocessed_image_id)
             except PreprocessedImage.DoesNotExist:
                 return JsonResponse({'error': 'Preprocessed image not found.'}, status=404)
 
-            # Optionally retrieve the AnalyzedImage if provided
             analyzed_image = None
             if analyzed_image_id:
                 try:
@@ -55,16 +67,14 @@ def submit_feedback(request):
                 except AnalyzedImage.DoesNotExist:
                     return JsonResponse({'error': 'Analyzed image not found.'}, status=404)
 
-            # Create a new FeedbackImage instance (analyzed image is optional)
             feedback = FeedbackImage(
                 preprocessed_image=preprocessed_image,
                 analyzed_image=analyzed_image,
-                feedback_data=predictions,  # Store bounding boxes and predictions
-                feedback_text=feedback_text  # Store optional feedback text
+                feedback_data=predictions,
+                feedback_text=feedback_text
             )
             feedback.save()
 
-            # Return a success response
             return JsonResponse({'message': 'Feedback successfully submitted!'}, status=201)
 
         except json.JSONDecodeError:
@@ -73,4 +83,3 @@ def submit_feedback(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
-
