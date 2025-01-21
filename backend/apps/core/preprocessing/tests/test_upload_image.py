@@ -14,7 +14,7 @@ class UploadImageViewTestCase(TestCase):
         )
         self.url = reverse('upload_image')
 
-    @patch('apps.core.preprocessing.api.views.analyze_image_task')  # Corrected the patch target
+    @patch('apps.core.preprocessing.api.views.analyze_image_task')
     def test_upload_image_success(self, mock_analyze_image_task):
 
         self.image_file = SimpleUploadedFile("test_image.jpg", b"image_data")
