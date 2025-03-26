@@ -1,0 +1,15 @@
+artifact_uri: file:///app/mlruns/0/e2ae3fa3e1f54233a5a7b9a57db892dd/artifacts
+end_time: 1742998464931
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: e2ae3fa3e1f54233a5a7b9a57db892dd
+run_name: debonair-shrimp-506
+run_uuid: e2ae3fa3e1f54233a5a7b9a57db892dd
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1742998462875
+status: 4
+tags: []
+user_id: root

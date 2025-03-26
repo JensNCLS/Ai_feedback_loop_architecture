@@ -12,6 +12,7 @@ services:
       - ./backend_project:/app
     environment:
       - DJANGO_SETTINGS_MODULE=backend.settings
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
     depends_on:
       - db
       - ai_models

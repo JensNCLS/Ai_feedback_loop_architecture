@@ -1,0 +1,15 @@
+artifact_uri: file:///app/mlruns/0/198edf0a92bc4a7a9a5c1e3f0fb11647/artifacts
+end_time: 1743000418925
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 198edf0a92bc4a7a9a5c1e3f0fb11647
+run_name: rogue-perch-792
+run_uuid: 198edf0a92bc4a7a9a5c1e3f0fb11647
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1743000413938
+status: 3
+tags: []
+user_id: root

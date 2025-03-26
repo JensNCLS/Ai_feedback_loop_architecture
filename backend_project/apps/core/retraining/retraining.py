@@ -1,6 +1,8 @@
 import logging
 import mlflow
 import mlflow.pytorch
+import torch
+import torch.nn as nn
 import time
 from ..models import FeedbackImage
 from ..logging.logging import get_logger
@@ -21,6 +23,13 @@ def log_method_call(func):
             raise
     return wrapper
 
+class MockModel(nn.Module):
+    def __init__(self):
+        super(MockModel, self).__init__()
+        self.layer = nn.Linear(1, 1)  # A simple linear layer
+
+    def forward(self, x):
+        return self.layer(x)
 
 class Model_retrainer:
     def __init__(self):
@@ -36,6 +45,9 @@ class Model_retrainer:
     def mock_retrain(self, feedback_data):
         time.sleep(3)
 
+        # Create a mock PyTorch model
+        model = MockModel()
+
         # Log metrics and parameters to MLflow
         with mlflow.start_run():
             mlflow.log_param("feedback_count", len(feedback_data))
@@ -43,8 +55,7 @@ class Model_retrainer:
             mlflow.log_metric("precision", 0.80)  # Replace with actual precision
             mlflow.log_metric("recall", 0.75)  # Replace with actual recall
 
-            # Save a mock model (replace with actual model saving logic)
-            model = {"model": "mock_model"}
+            # Save the mock PyTorch model
             mlflow.pytorch.log_model(model, "model")
 
         retrained_model_info = {"status": "success", "message": "Model retrained with feedback data."}
