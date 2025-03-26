@@ -11,7 +11,7 @@ logger = get_logger()
 #FastApi: uvicorn apps.ai_models.app:app --port 8001
 #React: npm start
 #retrain: python manage.py retrain_model
-#delery: celery -A backend.celery worker --loglevel=info --pool=solo
+#celery: celery -A backend.celery worker --loglevel=info --pool=solo
 
 def log_method_call(func):
     def wrapper(*args, **kwargs):
