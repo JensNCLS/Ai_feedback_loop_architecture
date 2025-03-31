@@ -39,12 +39,23 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: jensnicolaes@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: postgres123
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
       
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
     container_name: mlflow
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
     volumes:
