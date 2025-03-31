@@ -19,8 +19,8 @@ This project aims to create a robust architecture for AI systems that integrates
 
 - **Human-in-the-Loop Feedback**: Allows users to provide feedback on AI predictions to improve model performance.
 - **Model Retraining**: Automates the retraining process based on user feedback.
-- **GDPR Compliance**: Ensures data privacy and security.
-- **Microservices Architecture**: Modular design with separate services for backend, frontend, database, and AI models.
+- **(Partial) EU AI Act Compliance**: Ensures every process is logged.
+- **Architecture**: Modular design with separate services for backend, frontend, database, and AI models.
 - **MLflow Integration**: Tracks experiments, models, and artifacts.
 
 ## Project Structure
