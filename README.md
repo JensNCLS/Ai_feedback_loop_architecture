@@ -46,18 +46,18 @@ Ai_feedback_loop_architecture/
 ### Steps
 
 1. Clone the repository:
-```bash
+```zsh
    git clone Ai_feedback_loop_architecture
    cd Ai_feedback_loop_architecture
 ```
 
 2. Build and start the services:
-```bash
+```zsh
     docker-compose up --build
 ```
 
 3. Apply database migrations:
-```bash
+```zsh
     docker exec -it django-backend bash
     python manage.py makemigrations
     python manage.py migrate
