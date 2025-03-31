@@ -7,9 +7,6 @@ Developing a software architecture which allows implementation of a human-in-the
 - [Features](#features)
 - [Project Structure](#project-structure)
 - [Setup Instructions](#setup-instructions)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Overview
 
@@ -49,20 +46,28 @@ Ai_feedback_loop_architecture/
 ### Steps
 
 1. Clone the repository:
+```
    git clone <repository-url>
    cd Ai_feedback_loop_architecture
+```
 
 2. Build and start the services:
+```
     docker-compose up --build
+```
 
 3. Apply database migrations:
+```
     docker exec -it django-backend bash
     python manage.py makemigrations
     python manage.py migrate
+```
 
 4. Access the services:
+```
     Frontend: http://localhost:3000
     Backend: http://localhost:8000
     MLflow: http://localhost:5001
     pgAdmin: http://localhost:5050
+```
 
