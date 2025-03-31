@@ -10,7 +10,7 @@ Developing a software architecture which allows implementation of a human-in-the
 
 ## Overview
 
-This project aims to create a robust architecture for AI systems that integrates human feedback into the model retraining process. The architecture is designed to ensure compliance with GDPR and the EU AI Act, focusing on transparency, accountability, and data privacy.
+This project aims to create a robust architecture for AI systems that integrates human feedback into the model retraining process. The architecture is designed to ensure compliance with the EU AI Act.
 
 ## Features
 
@@ -46,28 +46,28 @@ Ai_feedback_loop_architecture/
 ### Steps
 
 1. Clone the repository:
-```
-   git clone <repository-url>
+```bash
+   git clone Ai_feedback_loop_architecture
    cd Ai_feedback_loop_architecture
 ```
 
 2. Build and start the services:
-```
+```bash
     docker-compose up --build
 ```
 
 3. Apply database migrations:
-```
+```bash
     docker exec -it django-backend bash
     python manage.py makemigrations
     python manage.py migrate
 ```
 
 4. Access the services:
-```
-    Frontend: http://localhost:3000
-    Backend: http://localhost:8000
-    MLflow: http://localhost:5001
-    pgAdmin: http://localhost:5050
-```
+
+ - **Frontend:** http://localhost:3000
+ - **Backend:** http://localhost:8000
+ - **MLflow:** http://localhost:5001
+ - **pgAdmin:** http://localhost:5050
+
 
