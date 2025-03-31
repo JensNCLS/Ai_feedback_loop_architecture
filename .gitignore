@@ -1,13 +1,7 @@
-# Ignore environment files
 .env
-
-# Node.js dependencies
 node_modules/
-
-# Python cache
 __pycache__/
-
-# Other common ignores
+data/raw_images/
 *.log
 *.sqlite3
 
