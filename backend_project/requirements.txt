@@ -4,5 +4,6 @@ Pillow==10.0.0
 django-cors-headers==4.0.0
 psycopg2-binary==2.9.7
 celery==5.3.1
+redis
 requests==2.31.0
 mlflow

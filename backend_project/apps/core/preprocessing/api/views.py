@@ -11,7 +11,6 @@ logger = get_logger()
 #FastApi: uvicorn apps.ai_models.app:app --port 8001
 #React: npm start
 #retrain: python manage.py retrain_model
-#celery: celery -A backend.celery worker --loglevel=info --pool=solo
 
 def log_method_call(func):
     def wrapper(*args, **kwargs):
@@ -37,7 +36,7 @@ def upload_image(request):
                 original_filename=image_file.name
             )
 
-            analyze_image_task(preprocessed_image.id)
+            analyze_image_task.delay(preprocessed_image.id)  # Asynchronous Celery task
 
             return JsonResponse({
                 "success": True,
