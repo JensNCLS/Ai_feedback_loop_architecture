@@ -47,7 +47,7 @@ Ai_feedback_loop_architecture/
 
 1. Clone the repository:
 ```zsh
-   git clone Ai_feedback_loop_architecture
+   git clone <repository>
    cd Ai_feedback_loop_architecture
 ```
 
