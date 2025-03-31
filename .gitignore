@@ -1,9 +1,44 @@
+# Environment files
 .env
-node_modules/
+
+# Python cache files
 __pycache__/
-data/raw_images/
-*.log
+*.pyc
+*.pyo
+*.pyd
+
+# Database files
 *.sqlite3
+db.sqlite3
+
+# Node.js dependencies
+node_modules/
+
+# Build and coverage files
+/build
+/coverage
+
+# Editor and IDE files
+.idea/
+.vscode/
+*.iml
+workspace.xml
+
+# Logs
+*.log
+
+# Static and media files
+backend/media/
+data/raw_images/
+
+# MLflow tracking files
+backend/mlruns/
+
+# Miscellaneous
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Default ignored files
 /shelf/
