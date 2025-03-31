@@ -16,6 +16,7 @@ services:
     depends_on:
       - db
       - ai_models
+      - redis
 
   ai_models:
     build:
@@ -82,6 +83,34 @@ services:
     stdin_open: true
     tty: true
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  celery-worker:
+    build:
+      context: ./backend_project
+      dockerfile: dockerfile
+    container_name: celery-worker
+    command: celery -A backend.celery worker --loglevel=info
+    depends_on:
+      - redis
+      - backend
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    volumes:
+      - ./backend_project:/app
+
 volumes:
   postgres_data:
   mlflow_data:
+  redis_data:
