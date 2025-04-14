@@ -10,6 +10,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend_project:/app
+      - ./yolov5:/app/yolov5  # Mount the YOLOv5 directory
     environment:
       - DJANGO_SETTINGS_MODULE=backend.settings
       - MLFLOW_TRACKING_URI=http://mlflow:5000

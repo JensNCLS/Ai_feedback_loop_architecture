@@ -1,10 +1,10 @@
 import React from 'react';
-import ImageUpload from "./components/ImageUpload";
+import ImageAnalysis from './components/ImageAnalysis';
 
 function App() {
   return (
     <div className="App">
-      <ImageUpload />
+      <ImageAnalysis/>
     </div>
   );
 }
