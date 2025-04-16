@@ -30,11 +30,12 @@ def analyze_image(preprocessed_image_id):
     if response.status_code == 200:
         analysis_results = response.json().get("predictions", [])
 
-        AnalyzedImage.objects.create(
+        analyzed_image = AnalyzedImage.objects.create(
             preprocessed_image=preprocessed_image,
             analysis_results=analysis_results
         )
 
-        return {"status": "success", "message": "Analysis completed successfully."}
+        # Return the created analyzed_image object instead of just a success message
+        return analyzed_image
     else:
         raise Exception(f"Analysis failed: {response.status_code} - {response.text}")
