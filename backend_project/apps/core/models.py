@@ -22,6 +22,11 @@ class AnalyzedImage(models.Model):
         return f"Analysis for Image {self.preprocessed_image.id}"
 
 class FeedbackImage(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending Review'),
+        ('reviewed', 'Reviewed'),
+    ]
+    
     preprocessed_image = models.ForeignKey(
         'PreprocessedImage',
         on_delete=models.CASCADE,
@@ -37,6 +42,11 @@ class FeedbackImage(models.Model):
     feedback_text = models.TextField(blank=True, null=True)
     feedback_given_at = models.DateTimeField(auto_now_add=True)
     retrained = models.BooleanField(default=False)
+    needs_review = models.BooleanField(default=False)
+    comparison_data = models.JSONField(null=True, blank=True)
+    review_notes = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Feedback for Image {self.preprocessed_image.id}"

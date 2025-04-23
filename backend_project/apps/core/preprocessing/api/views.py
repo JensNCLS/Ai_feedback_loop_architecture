@@ -30,14 +30,18 @@ def upload_image(request):
     if request.method == 'POST' and 'image' in request.FILES:
         try:
             image_file = request.FILES['image']
-
+            image_data = image_file.read()
+            
+            # Create the preprocessed image directly in this view
             preprocessed_image = PreprocessedImage.objects.create(
-                image=image_file.read(),
+                image=image_data,
                 original_filename=image_file.name
             )
 
-            analyze_image_task.delay(preprocessed_image.id)  # Asynchronous Celery task
-
+            # Asynchronously trigger the analysis task directly
+            analyze_image_task.delay(preprocessed_image.id)
+            
+            # Return the preprocessed_image_id that the frontend expects
             return JsonResponse({
                 "success": True,
                 "message": "Image successfully uploaded and analysis started!",
@@ -45,6 +49,7 @@ def upload_image(request):
             })
 
         except Exception as e:
+            logger.error(f"Image upload error: {str(e)}")
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "No image provided"}, status=400)
