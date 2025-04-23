@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from ...models import PreprocessedImage
-from ...tasks import preprocess_image_task, log_event_task
+from ...tasks import analyze_image_task
 from ...logging.logging import get_logger
 
 logger = get_logger()
@@ -38,19 +38,13 @@ def upload_image(request):
                 original_filename=image_file.name
             )
 
-            # Asynchronously trigger the analysis task
-            preprocess_image_task.delay(preprocessed_image.id)
-            
-            # Log the successful upload
-            try:
-                log_event_task.delay('INFO', f"Image uploaded: {image_file.name}", 'preprocessing')
-            except Exception as log_error:
-                logger.error(f"Failed to create log event: {log_error}")
+            # Asynchronously trigger the analysis task directly
+            analyze_image_task.delay(preprocessed_image.id)
             
             # Return the preprocessed_image_id that the frontend expects
             return JsonResponse({
                 "success": True,
-                "message": "Image upload received, processing started!",
+                "message": "Image successfully uploaded and analysis started!",
                 "preprocessed_image_id": preprocessed_image.id
             })
 

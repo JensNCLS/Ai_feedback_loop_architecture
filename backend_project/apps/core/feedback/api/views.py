@@ -5,7 +5,7 @@ from django.utils import timezone
 from ...models import AnalyzedImage, PreprocessedImage, FeedbackImage
 from django.shortcuts import get_object_or_404
 from ...logging.logging import get_logger
-from ...tasks import process_feedback_task, log_event_task
+from ...tasks import process_feedback_task
 from django.core.paginator import Paginator
 
 logger = get_logger()
@@ -161,34 +161,28 @@ def submit_feedback(request):
             if not preprocessed_image_id or not predictions:
                 return JsonResponse({'error': 'Missing preprocessed image ID or predictions.'}, status=400)
 
-            # Check if PreprocessedImage exists without storing it
             if not PreprocessedImage.objects.filter(id=preprocessed_image_id).exists():
                 return JsonResponse({'error': 'Preprocessed image not found.'}, status=404)
 
-            # If analyzed_image_id is provided, check if it exists
             if analyzed_image_id and not AnalyzedImage.objects.filter(id=analyzed_image_id).exists():
                 return JsonResponse({'error': 'Analyzed image not found.'}, status=404)
             
-            # Process feedback asynchronously using Celery
             task = process_feedback_task.delay(
                 preprocessed_image_id=preprocessed_image_id,
                 analyzed_image_id=analyzed_image_id,
                 feedback_data=predictions,
                 feedback_text=feedback_text
             )
-            
-            # Log the feedback submission
-            log_event_task.delay('INFO', f"Feedback submitted for image {preprocessed_image_id}", 'feedback')
 
             return JsonResponse({
                 'message': 'Feedback successfully submitted!',
                 'task_id': task.id
-            }, status=202)  # HTTP 202 Accepted for asynchronous processing
+            }, status=202)
 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
         except Exception as e:
-            log_event_task.delay('ERROR', f"Error submitting feedback: {str(e)}", 'feedback')
+            logger.error(f"Error submitting feedback: {str(e)}")
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method. Only POST is allowed.'}, status=405)
@@ -207,11 +201,10 @@ def submit_review(request, feedback_id):
         
         feedback = get_object_or_404(FeedbackImage, id=feedback_id)
         
-        # Update the feedback object with the review data
-        feedback.feedback_data = predictions  # Replace with reviewed predictions
+        feedback.feedback_data = predictions
         feedback.review_notes = review_notes
         feedback.status = status
-        feedback.reviewed_at = timezone.now()  # Add current timestamp
+        feedback.reviewed_at = timezone.now()
         
         feedback.save()
         
