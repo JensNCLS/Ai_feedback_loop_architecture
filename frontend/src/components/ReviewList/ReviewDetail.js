@@ -38,6 +38,9 @@ const ReviewDetail = () => {
         }
         
         const data = await response.json();
+        console.log('Review data received:', data);
+        console.log('Predictions received:', data.predictions);
+        
         setReviewData(data);
         setPredictions(data.predictions || []);
         setReviewNotes(data.review_notes || '');
@@ -357,9 +360,10 @@ const ReviewDetail = () => {
         <div className="review-panel">
           <div className="predictions-section">
             <h3>Dermatologist Predictions</h3>
-            {reviewData.status !== 'reviewed'}
+            {/* Removed the unused boolean expression that was here: {reviewData.status !== 'reviewed'} */}
             <div className="predictions-list">
-              {predictions.length > 0 ? (
+              {console.log('Rendering predictions list with:', predictions)}
+              {predictions && predictions.length > 0 ? (
                 predictions.map((pred, index) => (
                   <div
                     key={index}
