@@ -29,3 +29,33 @@ def analyze_image(image_file):
     results = model(image)  # Run inference on the image
     predictions = results.pandas().xyxy[0]  # Extract predictions in xyxy format
     return predictions.to_dict(orient="records")  # Return predictions as a dictionary
+
+# Reload the model with new weights
+def reload_model():
+    """
+    Reload the model from disk without restarting the service.
+    This is called when new weights are available.
+    
+    Returns:
+        String indicating success or error
+    """
+    global model, model_path
+    
+    try:
+        # Check if the model file exists
+        if not Path(model_path).is_file():
+            return f"Model file not found at {model_path}"
+            
+        # Get modification time to check if file has changed
+        mod_time = Path(model_path).stat().st_mtime
+            
+        # Reload the YOLOv5 model using torch hub
+        model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_path, force_reload=True)
+        
+        # Set the model to run on the CPU
+        model.to(torch.device("cpu"))
+        
+        return f"Model successfully reloaded from {model_path} (modified at {mod_time})"
+        
+    except Exception as e:
+        raise Exception(f"Error reloading model: {str(e)}")

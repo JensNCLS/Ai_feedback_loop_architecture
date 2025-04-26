@@ -10,7 +10,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend_project:/app
-      - ./yolov5:/app/yolov5  # Mount the YOLOv5 directory
+      - ./backend_project/yolov5:/app/yolov5  # Mount the YOLOv5 directory from backend_project
     environment:
       - DJANGO_SETTINGS_MODULE=backend.settings
       - MLFLOW_TRACKING_URI=http://mlflow:5000
@@ -111,7 +111,21 @@ services:
     volumes:
       - ./backend_project:/app
 
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001" 
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
 volumes:
   postgres_data:
   mlflow_data:
   redis_data:
+  minio_data:

@@ -1,7 +1,7 @@
 from django.db import models
 
 class PreprocessedImage(models.Model):
-    image = models.BinaryField()
+    image = models.BinaryField(null=True, blank=True)  # Making nullable temporarily
 
     original_filename = models.CharField(max_length=255)
     processed_at = models.DateTimeField(auto_now_add=True)

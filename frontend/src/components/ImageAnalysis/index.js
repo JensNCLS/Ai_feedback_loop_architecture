@@ -94,9 +94,13 @@ function ImageAnalysis() {
         const response = await fetch(
           `/api/check_analysis_status/${preprocessedImageId}/`
         );
+
         const data = await response.json();
 
         if (data.success) {
+          // Keep using the original image preview instead of fetching from MinIO
+          // We no longer need to update imageUrl here
+          
           if (data.status === "completed") {
             setPredictions(
               data.analysis_results.map((pred) => ({

@@ -1,0 +1,99 @@
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+[34m[1mtrain: [0mweights=yolov5s.pt, cfg=, data=/app/yolov5/data/feedback_dataset/dataset.yaml, hyp=data/hyps/hyp.scratch-low.yaml, epochs=5, batch_size=8, imgsz=1280, rect=False, resume=False, nosave=False, noval=False, noautoanchor=False, noplots=False, evolve=None, evolve_population=data/hyps, resume_evolve=None, bucket=, cache=ram, image_weights=False, device=, multi_scale=False, single_cls=False, optimizer=SGD, sync_bn=False, workers=2, project=runs/train, name=feedback_train_20250425_123439, exist_ok=False, quad=False, cos_lr=False, label_smoothing=0.0, patience=100, freeze=[0], save_period=-1, seed=0, local_rank=-1, entity=None, upload_dataset=False, bbox_interval=-1, artifact_alias=latest, ndjson_console=False, ndjson_file=False
+[34m[1mgithub: [0mup to date with https://github.com/ultralytics/yolov5 ✅
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+YOLOv5 🚀 v7.0-416-gfe1d4d99 Python-3.12.10 torch-2.7.0+cpu CPU
+
+[34m[1mhyperparameters: [0mlr0=0.01, lrf=0.01, momentum=0.937, weight_decay=0.0005, warmup_epochs=3.0, warmup_momentum=0.8, warmup_bias_lr=0.1, box=0.05, cls=0.5, cls_pw=1.0, obj=1.0, obj_pw=1.0, iou_t=0.2, anchor_t=4.0, fl_gamma=0.0, hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, degrees=0.0, translate=0.1, scale=0.5, shear=0.0, perspective=0.0, flipud=0.0, fliplr=0.5, mosaic=1.0, mixup=0.0, copy_paste=0.0
+[34m[1mComet: [0mrun 'pip install comet_ml' to automatically track and visualize YOLOv5 🚀 runs in Comet
+[34m[1mTensorBoard: [0mStart with 'tensorboard --logdir runs/train', view at http://localhost:6006/
+Downloading https://github.com/ultralytics/assets/releases/download/v0.0.0/Arial.ttf to /root/.config/Ultralytics/Arial.ttf...
+
+  0%|          | 0.00/755k [00:00<?, ?B/s]
+100%|██████████| 755k/755k [00:00<00:00, 9.94MB/s]
+Overriding model.yaml nc=80 with nc=1
+
+                 from  n    params  module                                  arguments                     
+  0                -1  1      3520  models.common.Conv                      [3, 32, 6, 2, 2]              
+  1                -1  1     18560  models.common.Conv                      [32, 64, 3, 2]                
+  2                -1  1     18816  models.common.C3                        [64, 64, 1]                   
+  3                -1  1     73984  models.common.Conv                      [64, 128, 3, 2]               
+  4                -1  2    115712  models.common.C3                        [128, 128, 2]                 
+  5                -1  1    295424  models.common.Conv                      [128, 256, 3, 2]              
+  6                -1  3    625152  models.common.C3                        [256, 256, 3]                 
+  7                -1  1   1180672  models.common.Conv                      [256, 512, 3, 2]              
+  8                -1  1   1182720  models.common.C3                        [512, 512, 1]                 
+  9                -1  1    656896  models.common.SPPF                      [512, 512, 5]                 
+ 10                -1  1    131584  models.common.Conv                      [512, 256, 1, 1]              
+ 11                -1  1         0  torch.nn.modules.upsampling.Upsample    [None, 2, 'nearest']          
+ 12           [-1, 6]  1         0  models.common.Concat                    [1]                           
+ 13                -1  1    361984  models.common.C3                        [512, 256, 1, False]          
+ 14                -1  1     33024  models.common.Conv                      [256, 128, 1, 1]              
+ 15                -1  1         0  torch.nn.modules.upsampling.Upsample    [None, 2, 'nearest']          
+ 16           [-1, 4]  1         0  models.common.Concat                    [1]                           
+ 17                -1  1     90880  models.common.C3                        [256, 128, 1, False]          
+ 18                -1  1    147712  models.common.Conv                      [128, 128, 3, 2]              
+ 19          [-1, 14]  1         0  models.common.Concat                    [1]                           
+ 20                -1  1    296448  models.common.C3                        [256, 256, 1, False]          
+ 21                -1  1    590336  models.common.Conv                      [256, 256, 3, 2]              
+ 22          [-1, 10]  1         0  models.common.Concat                    [1]                           
+ 23                -1  1   1182720  models.common.C3                        [512, 512, 1, False]          
+ 24      [17, 20, 23]  1     16182  models.yolo.Detect                      [1, [[10, 13, 16, 30, 33, 23], [30, 61, 62, 45, 59, 119], [116, 90, 156, 198, 373, 326]], [128, 256, 512]]
+Model summary: 214 layers, 7022326 parameters, 7022326 gradients, 15.9 GFLOPs
+
+Transferred 343/349 items from yolov5s.pt
+[34m[1moptimizer:[0m SGD(lr=0.01) with parameter groups 57 weight(decay=0.0), 60 weight(decay=0.0005), 60 bias
+
+[34m[1mtrain: [0mScanning /app/yolov5/data/feedback_dataset/labels/train...:   0%|          | 0/59 [00:00<?, ?it/s]
+[34m[1mtrain: [0mScanning /app/yolov5/data/feedback_dataset/labels/train... 59 images, 0 backgrounds, 0 corrupt: 100%|██████████| 59/59 [00:00<00:00, 3881.85it/s]
+[34m[1mtrain: [0mNew cache created: /app/yolov5/data/feedback_dataset/labels/train.cache
+
+  0%|          | 0/59 [00:00<?, ?it/s]
+[34m[1mtrain: [0mCaching images (0.0GB ram):  15%|█▌        | 9/59 [00:00<00:00, 81.41it/s]
+[34m[1mtrain: [0mCaching images (0.1GB ram):  49%|████▉     | 29/59 [00:00<00:00, 141.72it/s]
+[34m[1mtrain: [0mCaching images (0.2GB ram):  81%|████████▏ | 48/59 [00:00<00:00, 154.75it/s]
+[34m[1mtrain: [0mCaching images (0.2GB ram): 100%|██████████| 59/59 [00:00<00:00, 150.02it/s]
+
+[34m[1mval: [0mScanning /app/yolov5/data/feedback_dataset/labels/val...:   0%|          | 0/14 [00:00<?, ?it/s]
+[34m[1mval: [0mScanning /app/yolov5/data/feedback_dataset/labels/val... 14 images, 0 backgrounds, 0 corrupt: 100%|██████████| 14/14 [00:00<00:00, 947.48it/s]
+[34m[1mval: [0mNew cache created: /app/yolov5/data/feedback_dataset/labels/val.cache
+ERROR: Unexpected bus error encountered in worker. This might be caused by insufficient shared memory (shm).
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/multiprocessing/queues.py", line 264, in _feed
+    obj = _ForkingPickler.dumps(obj)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+  File "/usr/local/lib/python3.12/site-packages/torch/multiprocessing/reductions.py", line 618, in reduce_storage
+    fd, size = storage._share_fd_cpu_()
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/torch/storage.py", line 447, in wrapper
+    return fn(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/torch/storage.py", line 522, in _share_fd_cpu_
+    return super()._share_fd_cpu_(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: unable to write to file </torch_228_99752273_1>: No space left on device (28)
+Traceback (most recent call last):
+  File "/app/yolov5/train.py", line 986, in <module>
+    main(opt)
+  File "/app/yolov5/train.py", line 688, in main
+    train(opt.hyp, opt, device, callbacks)
+  File "/app/yolov5/train.py", line 309, in train
+    val_loader = create_dataloader(
+                 ^^^^^^^^^^^^^^^^^^
+  File "/app/yolov5/utils/dataloaders.py", line 184, in create_dataloader
+    dataset = LoadImagesAndLabels(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/app/yolov5/utils/dataloaders.py", line 683, in __init__
+    if cache_images == "ram" and not self.check_cache_ram(prefix=prefix):
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/yolov5/utils/dataloaders.py", line 708, in check_cache_ram
+    im = cv2.imread(random.choice(self.im_files))  # sample image
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/yolov5/utils/general.py", line 1273, in imread
+    return cv2.imdecode(np.fromfile(filename, np.uint8), flags)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/torch/utils/data/_utils/signal_handling.py", line 73, in handler
+    _error_if_any_worker_fails()
+RuntimeError: DataLoader worker (pid 227) is killed by signal: Bus error. It is possible that dataloader's workers are out of shared memory. Please try to raise your shared memory limit.

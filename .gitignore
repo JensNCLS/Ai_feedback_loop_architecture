@@ -31,6 +31,10 @@ workspace.xml
 backend/media/
 data/raw_images/
 
+# YOLOv5 directories
+backend_project/yolov5/
+yolov5/
+
 # MLflow tracking files
 backend/mlruns/
 

@@ -49,7 +49,6 @@ def upload_image(request):
             })
 
         except Exception as e:
-            logger.error(f"Image upload error: {str(e)}")
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "No image provided"}, status=400)
