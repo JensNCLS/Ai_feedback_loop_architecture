@@ -48,3 +48,7 @@ yarn-error.log*
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
+# YOLOv5 directories
+backend_project/yolov5/
+yolov5/

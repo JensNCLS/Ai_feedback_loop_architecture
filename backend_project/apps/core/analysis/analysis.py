@@ -1,6 +1,8 @@
 import requests
+import io
 from ..models import PreprocessedImage, AnalyzedImage
 from ..logging.logging import get_logger
+from ..utils import get_image_from_minio, upload_image_to_minio
 
 logger = get_logger()
 
@@ -21,21 +23,53 @@ def log_method_call(func):
 @log_method_call
 def analyze_image(preprocessed_image_id):
     preprocessed_image = PreprocessedImage.objects.get(id=preprocessed_image_id)
+    
+    # Retrieve image from MinIO
+    image_data = get_image_from_minio(
+        preprocessed_image.bucket_name, 
+        preprocessed_image.object_name
+    )
+    
+    if not image_data:
+        raise Exception(f"Failed to retrieve image from MinIO storage: {preprocessed_image.storage_path}")
 
-    files = {"image": (preprocessed_image.original_filename, preprocessed_image.image, "image/jpeg")}
+    # Prepare the files for the API request
+    files = {
+        "image": (
+            preprocessed_image.original_filename, 
+            io.BytesIO(image_data), 
+            "image/jpeg"
+        )
+    }
 
     url = "http://ai_models:8001/predict/"
     response = requests.post(url, files=files)
 
     if response.status_code == 200:
         analysis_results = response.json().get("predictions", [])
-
+        
+        # Create the analyzed image record with MinIO info
         analyzed_image = AnalyzedImage.objects.create(
             preprocessed_image=preprocessed_image,
-            analysis_results=analysis_results
+            analysis_results=analysis_results,
         )
+        
+        # If the response includes a result image, store it in MinIO as well
+        if "result_image" in response.json():
+            result_image = response.json().get("result_image")
+            if result_image:
+                # Upload result image to MinIO
+                result_bucket, result_object = upload_image_to_minio(
+                    result_image, 
+                    f"result_{preprocessed_image.original_filename}"
+                )
+                
+                # Update the analyzed image with result storage info
+                analyzed_image.result_bucket_name = result_bucket
+                analyzed_image.result_object_name = result_object
+                analyzed_image.save()
 
-        # Return the created analyzed_image object instead of just a success message
+        # Return the created analyzed_image object
         return analyzed_image
     else:
         raise Exception(f"Analysis failed: {response.status_code} - {response.text}")

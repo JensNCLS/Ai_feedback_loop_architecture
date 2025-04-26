@@ -17,3 +17,4 @@ celery==5.3.1
 redis
 requests==2.31.0
 mlflow
+minio==7.1.14

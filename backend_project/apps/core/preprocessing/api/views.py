@@ -3,6 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from ...models import PreprocessedImage
 from ...tasks import analyze_image_task
 from ...logging.logging import get_logger
+from ...utils import upload_image_to_minio
 
 logger = get_logger()
 
@@ -32,10 +33,14 @@ def upload_image(request):
             image_file = request.FILES['image']
             image_data = image_file.read()
             
-            # Create the preprocessed image directly in this view
+            # Upload image to MinIO
+            bucket_name, object_name = upload_image_to_minio(image_data, image_file.name)
+            
+            # Create the preprocessed image with MinIO storage info
             preprocessed_image = PreprocessedImage.objects.create(
-                image=image_data,
-                original_filename=image_file.name
+                original_filename=image_file.name,
+                bucket_name=bucket_name,
+                object_name=object_name
             )
 
             # Asynchronously trigger the analysis task directly

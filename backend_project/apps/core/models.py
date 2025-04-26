@@ -1,13 +1,22 @@
 from django.db import models
 
 class PreprocessedImage(models.Model):
-    image = models.BinaryField()
-
     original_filename = models.CharField(max_length=255)
     processed_at = models.DateTimeField(auto_now_add=True)
+    
+    # MinIO storage fields
+    bucket_name = models.CharField(max_length=100, default='skinimages')
+    object_name = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"Preprocessed Image {self.id} - {self.original_filename}"
+        
+    @property
+    def storage_path(self):
+        """Return the full storage path in the format 'bucket_name/object_name'"""
+        if self.bucket_name and self.object_name:
+            return f"{self.bucket_name}/{self.object_name}"
+        return None
 
 class AnalyzedImage(models.Model):
     preprocessed_image = models.OneToOneField(
