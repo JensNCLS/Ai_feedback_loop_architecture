@@ -10,7 +10,8 @@ services:
       - "8000:8000"
     volumes:
       - ./backend_project:/app
-      - ./yolov5:/app/yolov5  # Mount the YOLOv5 directory
+      - model_storage:/app/shared_models  # Shared volume for model storage
+      - mlflow_data:/app/media/mlflow/artifacts
     environment:
       - DJANGO_SETTINGS_MODULE=backend.settings
       - MLFLOW_TRACKING_URI=http://mlflow:5000
@@ -29,6 +30,8 @@ services:
     command: uvicorn app:app --host 0.0.0.0 --port 8001
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - model_storage:/app/shared_models  # Same shared volume for model storage
 
   db:
     image: postgres:15
@@ -60,15 +63,13 @@ services:
       - "5001:5000"
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
-    volumes:
-      - mlflow_data:/mlflow
     command:
       - mlflow
       - server
       - --backend-store-uri
       - sqlite:///mlflow.db
       - --default-artifact-root
-      - /mlflow/artifacts
+      - /app/media/mlflow/artifacts
       - --host
       - 0.0.0.0
       - --port
@@ -129,3 +130,4 @@ volumes:
   mlflow_data:
   redis_data:
   minio_data:
+  model_storage:
