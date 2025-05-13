@@ -3,9 +3,9 @@ from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from .analysis.analysis import analyze_image
 from .models import PreprocessedImage, FeedbackImage, AnalyzedImage
-from .retraining.retraining import Model_retrainer
 from .feedback.comparing.bbox_comparison import flag_for_review_check
 from .logging.logging import get_logger
+from .retraining.retraining import retraining
 
 # Get the logger instance
 logger = get_logger()
@@ -16,7 +16,6 @@ def analyze_image_task(preprocessed_image_id):
         analyzed_image = analyze_image(preprocessed_image_id)
         return {"status": "success", "message": "Image analyzed", "analyzed_image_id": analyzed_image.id}
     except Exception as e:
-        logger.error(f"Error analyzing image {preprocessed_image_id}: {str(e)}")
         return {"status": "failure", "message": str(e)}
 
 @shared_task
@@ -95,4 +94,13 @@ def process_feedback_task(preprocessed_image_id, analyzed_image_id, feedback_dat
         }
     except Exception as e:
         logger.error(f"Feedback processing error: {str(e)}")
+        return {"status": "failure", "message": str(e)}
+
+@shared_task
+def retrain_model_task():
+    try:
+        retrain_results = retraining()
+        return retrain_results  # This is already a properly formatted dictionary
+    except Exception as e:
+        logger.error(f"Error in retrain_model_task: {e}")
         return {"status": "failure", "message": str(e)}

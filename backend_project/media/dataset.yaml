@@ -1,0 +1,10 @@
+{
+  "path": "/app/media",
+  "train": "images/train",
+  "val": "images/val",
+  "nc": 2,
+  "names": [
+    "New Finding",
+    "Nodular BCC"
+  ]
+}

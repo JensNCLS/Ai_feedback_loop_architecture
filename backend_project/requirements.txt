@@ -10,10 +10,12 @@ tqdm>=4.64.0
 pandas>=1.1.4
 seaborn>=0.11.0
 scipy>=1.4.1
-Pillow==10.0.0
+pillow>=10.3.0
+requests>=2.32.2 
+thop>=0.1.1
 django-cors-headers==4.0.0
 psycopg2-binary==2.9.7
 celery==5.3.1
 redis
-requests==2.31.0
 mlflow
+minio==7.1.14

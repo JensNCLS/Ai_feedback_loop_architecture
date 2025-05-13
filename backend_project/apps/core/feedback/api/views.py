@@ -49,8 +49,8 @@ def get_review_items(request):
         for feedback in current_page:
             
             image_url = None
-            if (feedback.preprocessed_image and feedback.preprocessed_image.image):
-
+            if feedback.preprocessed_image:
+                # Simply create an API URL to fetch the image
                 image_url = f"/api/image/{feedback.preprocessed_image.id}/"
             
             prediction_count = len(feedback.feedback_data) if feedback.feedback_data else 0
@@ -91,19 +91,41 @@ def get_review_detail(request, feedback_id):
     try:
         feedback = get_object_or_404(FeedbackImage, id=feedback_id)
         
-        # Create a data URL for the image instead of trying to access url attribute
+        # Create a data URL for the image from MinIO storage
         image_url = None
-        if feedback.preprocessed_image and feedback.preprocessed_image.image:
-            # Convert binary data to base64 for data URL
-            import base64
-            image_data = feedback.preprocessed_image.image
-            image_base64 = base64.b64encode(image_data).decode('utf-8')
-            # Assuming JPEG format, adjust if needed
-            image_url = f"data:image/jpeg;base64,{image_base64}"
+        if feedback.preprocessed_image:
+            try:
+                from ...utils import get_image_from_minio
+                import base64
+                
+                # Retrieve image data from MinIO
+                image_data = get_image_from_minio(
+                    feedback.preprocessed_image.bucket_name,
+                    feedback.preprocessed_image.object_name
+                )
+                
+                if image_data:
+                    # Convert binary data to base64 for data URL
+                    image_base64 = base64.b64encode(image_data).decode('utf-8')
+                    # Assuming JPEG format, adjust if needed
+                    image_url = f"data:image/jpeg;base64,{image_base64}"
+                else:
+                    # Fall back to API URL if MinIO retrieval fails
+                    image_url = f"/api/image/{feedback.preprocessed_image.id}/"
+            except Exception as e:
+                logger.error(f"Error retrieving image from MinIO: {e}")
+                # Fall back to API URL
+                image_url = f"/api/image/{feedback.preprocessed_image.id}/"
         
         # Get original AI predictions and feedback predictions
         ai_predictions = feedback.analyzed_image.analysis_results if feedback.analyzed_image else []
         feedback_predictions = feedback.feedback_data if feedback.feedback_data else []
+        
+        # Add detailed logging to help diagnose the issue
+        logger.info(f"Review detail for feedback ID {feedback_id}:")
+        logger.info(f"Feedback data type: {type(feedback.feedback_data)}")
+        logger.info(f"Feedback data content: {feedback.feedback_data}")
+        logger.info(f"Predictions count: {len(feedback_predictions)}")
         
         # Get comparison data if available
         comparison_data = feedback.comparison_data if feedback.comparison_data else {}
@@ -220,14 +242,27 @@ def get_image(request, image_id):
     try:
         preprocessed_image = get_object_or_404(PreprocessedImage, id=image_id)
         
-        if preprocessed_image.image:
-            # Return the image directly as binary data with appropriate content type
-            return HttpResponse(
-                preprocessed_image.image,
-                content_type='image/jpeg'  # Adjust if you have other image types
+        try:
+            from ...utils import get_image_from_minio
+            
+            # Get image data from MinIO storage
+            image_data = get_image_from_minio(
+                preprocessed_image.bucket_name,
+                preprocessed_image.object_name
             )
-        else:
-            return HttpResponse(status=404)
+            
+            if image_data:
+                # Return the image directly as binary data with appropriate content type
+                return HttpResponse(
+                    image_data,
+                    content_type='image/jpeg'  # Adjust if you have other image types
+                )
+            else:
+                logger.error(f"Image data not found in MinIO for image {image_id}")
+                return HttpResponse(status=404)
+        except Exception as e:
+            logger.error(f"Error retrieving image from MinIO: {e}")
+            return HttpResponse(status=500)
     except Exception as e:
         logger.error(f"Error serving image {image_id}: {e}")
         return HttpResponse(status=500)
