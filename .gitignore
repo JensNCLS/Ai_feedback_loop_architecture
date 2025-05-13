@@ -35,10 +35,12 @@ workspace.xml
 
 # Static and media files
 backend/media
+backend_project/media/
 data/raw_images/
 
 # MLflow tracking files
 backend/mlruns/
+backend_project/mlruns/
 
 # Miscellaneous
 .DS_Store
@@ -57,5 +59,7 @@ yarn-error.log*
 
 # YOLOv5 directories
 backend_project/yolov5/
-backend_project/media/
 yolov5/
+
+# Keep migration files (comment out the following line if you want to ignore them)
+# backend_project/apps/core/migrations/
