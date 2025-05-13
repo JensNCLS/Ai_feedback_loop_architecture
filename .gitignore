@@ -28,7 +28,7 @@ workspace.xml
 *.log
 
 # Static and media files
-backend/media/
+backend/media
 data/raw_images/
 
 # MLflow tracking files
@@ -51,4 +51,5 @@ yarn-error.log*
 
 # YOLOv5 directories
 backend_project/yolov5/
+backend_project/media/
 yolov5/
