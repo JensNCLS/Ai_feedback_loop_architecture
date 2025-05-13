@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
 from .analysis.analysis import analyze_image
-from .models import PreprocessedImage, FeedbackImage, AnalyzedImage
+from .models import PreprocessedImage, FeedbackImage, AnalyzedImage, FirstReviewerFeedbackImage
 from .feedback.comparing.bbox_comparison import flag_for_review_check
 from .logging.logging import get_logger
 from .retraining.retraining import retraining
@@ -16,6 +16,30 @@ def analyze_image_task(preprocessed_image_id):
         analyzed_image = analyze_image(preprocessed_image_id)
         return {"status": "success", "message": "Image analyzed", "analyzed_image_id": analyzed_image.id}
     except Exception as e:
+        logger.error(f"Error analyzing image {preprocessed_image_id}: {str(e)}")
+        return {"status": "failure", "message": str(e)}
+
+@shared_task
+def process_unreviewed_feedback_task(preprocessed_image_id, analyzed_image_id, feedback_data, feedback_text=None):
+    try:
+        # Get the related objects
+        preprocessed_image = PreprocessedImage.objects.get(id=preprocessed_image_id)
+        analyzed_image = AnalyzedImage.objects.get(id=analyzed_image_id)
+        
+        feedback = FirstReviewerFeedbackImage.objects.create(
+            preprocessed_image=preprocessed_image,
+            analyzed_image=analyzed_image,
+            feedback_data=feedback_data,
+            feedback_text=feedback_text,
+        )
+        
+        return {
+            "status": "success", 
+            "feedback_id": feedback.id
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in process_unreviewed_feedback_task: {e}")
         return {"status": "failure", "message": str(e)}
 
 @shared_task
@@ -29,6 +53,8 @@ def process_feedback_task(preprocessed_image_id, analyzed_image_id, feedback_dat
         # Compare AI predictions with feedback and check if it needs review
         needs_review = False
         comparison_result = None
+        # Initialize status with default value
+        status = 'reviewed'
         
         # First, check for the case where AI found nothing but dermatologist did
         ai_predictions = []
@@ -52,6 +78,7 @@ def process_feedback_task(preprocessed_image_id, analyzed_image_id, feedback_dat
                 'false_positives': []
             }
             logger.warning(f"Image {preprocessed_image_id} flagged for review: AI detected nothing but dermatologist found {len(feedback_data)} lesions")
+            status = "pending"
         # Otherwise run the normal comparison if there are AI predictions
         elif len(ai_predictions) > 0:
             try:
@@ -73,6 +100,7 @@ def process_feedback_task(preprocessed_image_id, analyzed_image_id, feedback_dat
                 
                 if needs_review:
                     logger.warning(f"Image {preprocessed_image_id} flagged for review due to significant differences")
+                    status = "pending"
             
             except Exception as e:
                 logger.error(f"Error during prediction comparison: {str(e)}")
@@ -83,7 +111,8 @@ def process_feedback_task(preprocessed_image_id, analyzed_image_id, feedback_dat
             feedback_data=feedback_data,
             feedback_text=feedback_text,
             needs_review=needs_review,
-            comparison_data=comparison_result
+            comparison_data=comparison_result,
+            status=status
         )
         
         return {

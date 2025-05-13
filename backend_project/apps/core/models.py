@@ -30,6 +30,32 @@ class AnalyzedImage(models.Model):
     def __str__(self):
         return f"Analysis for Image {self.preprocessed_image.id}"
 
+class FirstReviewerFeedbackImage(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending Review'),
+        ('reviewed', 'Reviewed'),
+    ]
+
+    preprocessed_image = models.ForeignKey(
+        'PreprocessedImage',
+        on_delete=models.CASCADE,
+        related_name='first_reviewer_feedback_images'
+    )
+    analyzed_image = models.ForeignKey(
+        'AnalyzedImage',
+        on_delete=models.CASCADE,
+        related_name='first_reviewer_feedback_images',
+        null=True, blank=True
+    )
+    feedback_data = models.JSONField()
+    feedback_text = models.TextField(blank=True, null=True)
+    feedback_given_at = models.DateTimeField(auto_now_add=True)
+    retrained = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='reviewed')
+
+    def __str__(self):
+        return f"Feedback for Image {self.preprocessed_image.id}"
+
 class FeedbackImage(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending Review'),
@@ -54,7 +80,7 @@ class FeedbackImage(models.Model):
     needs_review = models.BooleanField(default=False)
     comparison_data = models.JSONField(null=True, blank=True)
     review_notes = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='reviewed')
     reviewed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

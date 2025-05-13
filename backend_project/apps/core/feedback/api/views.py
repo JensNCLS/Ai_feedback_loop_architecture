@@ -5,7 +5,7 @@ from django.utils import timezone
 from ...models import AnalyzedImage, PreprocessedImage, FeedbackImage
 from django.shortcuts import get_object_or_404
 from ...logging.logging import get_logger
-from ...tasks import process_feedback_task
+from ...tasks import process_feedback_task, process_unreviewed_feedback_task
 from django.core.paginator import Paginator
 
 logger = get_logger()
@@ -188,6 +188,13 @@ def submit_feedback(request):
 
             if analyzed_image_id and not AnalyzedImage.objects.filter(id=analyzed_image_id).exists():
                 return JsonResponse({'error': 'Analyzed image not found.'}, status=404)
+            
+            process_unreviewed_feedback_task.delay(
+                preprocessed_image_id=preprocessed_image_id,
+                analyzed_image_id=analyzed_image_id,
+                feedback_data=predictions,
+                feedback_text=feedback_text
+            )
             
             task = process_feedback_task.delay(
                 preprocessed_image_id=preprocessed_image_id,

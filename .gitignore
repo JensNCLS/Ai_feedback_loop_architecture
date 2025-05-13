@@ -1,3 +1,9 @@
+# Ignore actions-runner
+actions-runner/
+
+# MLRuns
+mlruns/
+
 # Environment files
 .env
 
