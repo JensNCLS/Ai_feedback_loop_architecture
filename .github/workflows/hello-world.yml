@@ -1,0 +1,39 @@
+name: Hello World
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+  # Push to any branch (optional, you can remove if you only want manual triggering)
+  push:
+    branches: [ main, master, dvc ]
+
+jobs:
+  hello-world:
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Print Hello World
+        run: |
+          echo "Hello World from GitHub Actions Runner!"
+          echo "Current date and time: $(date)"
+          echo "Runner OS: $(uname -a)"
+          
+      - name: Environment Info
+        run: |
+          echo "GitHub workspace: $GITHUB_WORKSPACE"
+          echo "GitHub event: $GITHUB_EVENT_NAME"
+          echo "Repository: $GITHUB_REPOSITORY"
+          pwd
+          ls -la
+          
+      - name: Python Version
+        run: |
+          # Check if Python is installed
+          if command -v python3 &>/dev/null; then
+            python3 --version
+          else
+            echo "Python 3 not found"
+          fi
