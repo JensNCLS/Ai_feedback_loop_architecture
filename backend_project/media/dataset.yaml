@@ -1,10 +1,13 @@
-{
-  "path": "/app/media",
-  "train": "images/train",
-  "val": "images/val",
-  "nc": 2,
-  "names": [
-    "New Finding",
-    "Nodular BCC"
-  ]
-}
+path: /app/media
+train: images/train
+val: images/val
+nc: 8
+names:
+  - Nodular BCC
+  - Infiltrative BCC
+  - Superficial BCC
+  - Micronodular BCC
+  - Inflamation/Possible BCC
+  - Hair follicle
+  - Glands
+  - Epidermis

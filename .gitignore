@@ -34,9 +34,11 @@ workspace.xml
 *.log
 
 # Static and media files
-backend/media
-backend_project/media/
 data/raw_images/
+# Ignore all media files but not dataset.yaml
+backend_project/media/*
+!backend_project/media/dataset.yaml
+backend/media/
 
 # MLflow tracking files
 backend/mlruns/
@@ -60,8 +62,3 @@ yarn-error.log*
 
 backend_project/yolov5/
 yolov5/
-/media/images
-/media/labels
-/media/mlflow
-/media/raw
-/media/runs

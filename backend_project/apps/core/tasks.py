@@ -124,12 +124,3 @@ def process_feedback_task(preprocessed_image_id, analyzed_image_id, feedback_dat
     except Exception as e:
         logger.error(f"Feedback processing error: {str(e)}")
         return {"status": "failure", "message": str(e)}
-
-@shared_task
-def retrain_model_task():
-    try:
-        retrain_results = retraining()
-        return retrain_results  # This is already a properly formatted dictionary
-    except Exception as e:
-        logger.error(f"Error in retrain_model_task: {e}")
-        return {"status": "failure", "message": str(e)}
