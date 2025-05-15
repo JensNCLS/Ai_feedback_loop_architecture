@@ -1,0 +1,72 @@
+schema: '2.0'
+stages:
+  data_collection:
+    cmd: python manage.py fetch_training_data
+    deps:
+    - path: apps/core/management/commands/fetch_training_data.py
+      hash: md5
+      md5: 7f0f54239f66e156e4d3abbac6fcb8ce
+      size: 590
+    - path: apps/core/retraining/data_collection.py
+      hash: md5
+      md5: 98152ab01af8d57180a982f3c3270ffb
+      size: 2544
+    outs:
+    - path: media/raw
+      hash: md5
+      md5: b4402ac61ee850e6842f550f0674a6ef.dir
+      size: 20756
+      nfiles: 1
+  data_formatting:
+    cmd: python manage.py format_training_data
+    deps:
+    - path: apps/core/management/commands/format_training_data.py
+      hash: md5
+      md5: 332d29d4ac815912a3086f935ac4fb72
+      size: 595
+    - path: apps/core/retraining/data_formatting.py
+      hash: md5
+      md5: eb759986526916e8be05c1e9f9b940da
+      size: 8141
+    outs:
+    - path: media/images
+      hash: md5
+      md5: 9535f5257c57b4a3cd74238ff3167f06.dir
+      size: 50697823
+      nfiles: 7
+    - path: media/labels
+      hash: md5
+      md5: 203ac871fb7821f407e22788386ae213.dir
+      size: 2615
+      nfiles: 7
+  model_training:
+    cmd: python manage.py train_model
+    deps:
+    - path: apps/core/management/commands/train_model.py
+      hash: md5
+      md5: 5597a746476df2a252ddd0e767c4bf7e
+      size: 709
+    - path: apps/core/retraining/retraining.py
+      hash: md5
+      md5: 3800f2b7a304eac0eecb80591ff75944
+      size: 8542
+    - path: media/dataset.yaml
+      hash: md5
+      md5: 1536935dd27e788f29f03efb87f36029
+      size: 216
+    - path: media/images
+      hash: md5
+      md5: 9535f5257c57b4a3cd74238ff3167f06.dir
+      size: 50697823
+      nfiles: 7
+    - path: media/labels
+      hash: md5
+      md5: b510a6683c34db24d99624e1e6212913.dir
+      size: 5599
+      nfiles: 9
+    outs:
+    - path: media/runs/train
+      hash: md5
+      md5: 5b75c8a4329025b90dcb216383200bc8.dir
+      size: 31034740
+      nfiles: 18

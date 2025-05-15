@@ -1,0 +1,26 @@
+stages:
+  data_collection:
+    cmd: python manage.py fetch_training_data
+    deps:
+    - apps/core/management/commands/fetch_training_data.py
+    - apps/core/retraining/data_collection.py
+    outs:
+    - media/raw
+  data_formatting:
+    cmd: python manage.py format_training_data
+    deps:
+    - apps/core/management/commands/format_training_data.py
+    - apps/core/retraining/data_formatting.py
+    outs:
+    - media/images
+    - media/labels
+  model_training:
+    cmd: python manage.py train_model
+    deps:
+    - apps/core/management/commands/train_model.py
+    - apps/core/retraining/retraining.py
+    - media/images
+    - media/labels
+    - media/dataset.yaml
+    outs:
+    - media/runs/train

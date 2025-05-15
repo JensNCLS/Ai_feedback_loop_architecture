@@ -1,18 +1,11 @@
-import json
-from PIL import Image
-from io import BytesIO
-import random
 from pathlib import Path
-import pathlib
 import platform
 import subprocess
 import sys
 import mlflow
-import platform
-
+import json
+import yaml  # For YAML file parsing
 from ..logging.logging import get_logger
-from ..models import FeedbackImage
-from ..utils import get_image_from_minio
 
 logger = get_logger()
 
@@ -31,185 +24,51 @@ def log_method_call(func):
     return wrapper
 
 @log_method_call
-def fetch_and_format_training_data():
-    try:
-        feedback_images = FeedbackImage.objects.filter(status='reviewed', retrained=False)
-        
-        if not feedback_images.exists():
-            logger.info("No feedback images to process.")
-            return {"status": "success", "message": "No feedback images to process."}
-            
-        # Create directories for YOLOv5 format if they don't exist
-        base_dir = Path(__file__).parent.parent.parent.parent / "media"
-        images_train_dir = base_dir / "images" / "train"
-        images_val_dir = base_dir / "images" / "val"
-        labels_train_dir = base_dir / "labels" / "train"
-        labels_val_dir = base_dir / "labels" / "val"
-        
-        # Clean up existing files in the training directories
-        for directory in [images_train_dir, images_val_dir, labels_train_dir, labels_val_dir]:
-            directory.mkdir(parents=True, exist_ok=True)
-            # Remove all existing files in the directory
-            for file_path in directory.glob("*"):
-                if file_path.is_file():
-                    try:
-                        file_path.unlink()
-                    except Exception as e:
-                        logger.error(f"Error removing file {file_path}: {e}")
-            
-        processed_count = 0
-        class_names_set = set()
-        
-        # Process each feedback image
-        for feedback_image in feedback_images:
-            try:
-                # Skip if no feedback data
-                if not feedback_image.feedback_data:
-                    logger.warning(f"No feedback data for image {feedback_image.id}")
-                    continue
-                    
-                preprocessed_image = feedback_image.preprocessed_image
-                if not preprocessed_image:
-                    logger.warning(f"No preprocessed image for feedback {feedback_image.id}")
-                    continue
-                
-                # Get image data from MinIO using preprocessedId
-                image_data = get_image_from_minio(
-                    preprocessed_image.bucket_name,
-                    preprocessed_image.object_name
-                )
-                
-                if not image_data:
-                    logger.warning(f"Failed to retrieve image from MinIO for preprocessed image {preprocessed_image.id}")
-                    continue
-                
-                # Load image to get dimensions
-                img = Image.open(BytesIO(image_data))
-                img_width, img_height = img.size
-                
-                # Split into train/val with 80/20 ratio
-                is_train = random.random() < 0.8
-                
-                # Set image and label paths
-                img_dir = images_train_dir if is_train else images_val_dir
-                label_dir = labels_train_dir if is_train else labels_val_dir
-                
-                # Create unique filename using preprocessed image ID
-                img_filename = f"{preprocessed_image.id}.jpg"
-                img_path = img_dir / img_filename
-                
-                # Save image
-                with open(img_path, "wb") as f:
-                    f.write(image_data)
-                
-                # Create YOLOv5 format labels (class_id center_x center_y width height)
-                label_lines = []
-                
-                for box in feedback_image.feedback_data:
-                    try:
-                        # Extract class name and bounding box coordinates
-                        class_name = box.get("name", "unknown")
-                        class_names_set.add(class_name)
-                        
-                        # Extract bounding box coordinates (ensure they are floats)
-                        xmin = float(box.get("xmin", 0))
-                        ymin = float(box.get("ymin", 0))
-                        xmax = float(box.get("xmax", 0))
-                        ymax = float(box.get("ymax", 0))
-                        
-                        # Convert to YOLOv5 format (normalized center_x, center_y, width, height)
-                        center_x = (xmin + xmax) / (2.0 * img_width)
-                        center_y = (ymin + ymax) / (2.0 * img_height)
-                        width = (xmax - xmin) / img_width
-                        height = (ymax - ymin) / img_height
-                        
-                        # Ensure values are within [0, 1]
-                        center_x = max(0, min(center_x, 1.0))
-                        center_y = max(0, min(center_y, 1.0))
-                        width = max(0, min(width, 1.0))
-                        height = max(0, min(height, 1.0))
-                        
-                        # Temporarily use 0 as class_id (we'll update this later)
-                        # Will be replaced after we have all class names
-                        label_lines.append(f"0 {center_x:.6f} {center_y:.6f} {width:.6f} {height:.6f}")
-                    except Exception as e:
-                        logger.error(f"Error processing bounding box: {e}")
-                    
-                    logger.info(label_lines)
-                
-                if label_lines:
-                    # Create label file with same base name but .txt extension
-                    label_filename = f"{preprocessed_image.id}.txt"
-                    label_path = label_dir / label_filename
-                    
-                    with open(label_path, "w") as f:
-                        f.write("\n".join(label_lines))
-                
-                processed_count += 1
-                
-            except Exception as e:
-                logger.error(f"Error processing feedback image {feedback_image.id}: {e}")
-    
-        # Create class mapping and update label files
-        class_mapping = {name: idx for idx, name in enumerate(sorted(class_names_set))}
-
-        # Create YAML config file for YOLOv5
-        yaml_path = base_dir / "dataset.yaml"
-        with open(yaml_path, "w") as f:
-            yaml_content = {
-                "path": str(base_dir),
-                "train": str(images_train_dir.relative_to(base_dir)),
-                "val": str(images_val_dir.relative_to(base_dir)),
-                "nc": len(class_mapping),
-                "names": list(class_mapping.keys())
-            }
-            json.dump(yaml_content, f, indent=2)
-
-        # Update all label files with correct class IDs
-        for label_dir in [labels_train_dir, labels_val_dir]:
-            for label_file in label_dir.glob("*.txt"):
-                with open(label_file, "r") as f:
-                    lines = f.readlines()
-
-                updated_lines = []
-                for line in lines:
-                    parts = line.strip().split()
-                    if len(parts) >= 5:  # Ensure valid label format
-                        class_name = parts[0]  # Temporarily stored as class name
-                        class_id = class_mapping.get(class_name, 0)
-                        updated_lines.append(f"{class_id} {' '.join(parts[1:])}")
-
-                with open(label_file, "w") as f:
-                    f.write("\n".join(updated_lines))
-        
-        # Convert class_names_set to a list before returning or using it
-        class_names_list = list(class_names_set)
-
-        return {
-            "status": "success", 
-            "message": f"Processed {processed_count} images for training", 
-            "count": processed_count,
-            "class_names": class_names_list,
-            "feedback_images": feedback_images
-        }
-        
-    except Exception as e:
-        logger.error(f"Error in fetch_and_format_training_data: {e}")
-        return {"status": "failure", "message": str(e), "count": 0}
-
-@log_method_call
 def retraining():
     try:
-        # Step 1: Prepare training data
-        data_results = fetch_and_format_training_data()
+        # Step 1: Load the processed data from previous DVC step
+        project_root = Path(__file__).parent.parent.parent.parent
+        json_path = project_root / "media" / "raw" / "feedback_images.json"
         
-        if data_results.get("status") == "failure":
-            logger.error(f"Data preparation failed: {data_results.get('message')}")
-            return data_results
+        # Check if the JSON file exists
+        if not json_path.exists():
+            logger.error(f"Training data file not found at {json_path}")
+            return {"status": "failure", "message": f"Training data file not found at {json_path}"}
             
-        if data_results.get("count", 0) == 0:
-            logger.info("No images to train on, skipping training")
-            return data_results
+        # Load the data from JSON file
+        try:
+            with open(json_path, 'r') as f:
+                feedback_images = json.load(f)
+            
+            # Check if we have a valid list of feedback images
+            if not isinstance(feedback_images, list):
+                logger.error("Feedback images JSON is not a list")
+                return {"status": "failure", "message": "Feedback images JSON is not a list"}
+                
+            if len(feedback_images) == 0:
+                logger.info("No images to train on, skipping training")
+                return {"status": "success", "message": "No images to train on", "count": 0}
+                
+            # Create a data_results dictionary with feedback images and metadata
+            data_results = {
+                "status": "success",
+                "count": len(feedback_images),
+                "feedback_images": feedback_images,
+                "class_names": []
+            }
+            
+            # Extract unique class names from feedback data
+            class_names = set()
+            for img in feedback_images:
+                if img.get("feedback_data"):
+                    for box in img.get("feedback_data", []):
+                        if box.get("name"):
+                            class_names.add(box.get("name"))
+            
+            data_results["class_names"] = list(class_names)
+        except Exception as e:
+            logger.error(f"Error loading training data: {e}")
+            return {"status": "failure", "message": f"Error loading training data: {e}"}
         
         # Step 2: Run YOLOv5 training
         logger.info("Starting YOLOv5 training")
@@ -241,16 +100,21 @@ def retraining():
         logger.info(f"Running training command: {' '.join(cmd)}")
 
         try:
+            # Run without capturing stdout/stderr to avoid binary data issues
             process = subprocess.run(
                 cmd,
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
+                check=False,  # Handle return code manually
+                capture_output=False  # Don't capture output
             )
-
+            
+            if process.returncode != 0:
+                logger.error(f"Training process failed with code {process.returncode}")
+                return {
+                    "status": "failure",
+                    "message": f"Training process failed with exit code {process.returncode}"
+                }
+                
             logger.info("Training completed successfully")
-            logger.debug(f"Training stdout: {process.stdout}")
 
             # Find latest exp folder
             def get_latest_exp_dir(base_dir):

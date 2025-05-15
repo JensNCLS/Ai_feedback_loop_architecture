@@ -19,6 +19,7 @@ services:
       - db
       - ai_models
       - redis
+    shm_size: '4gb'  # Increased shared memory for ML training
 
   ai_models:
     build:

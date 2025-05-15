@@ -57,9 +57,11 @@ yarn-error.log*
 /dataSources/
 /dataSources.local.xml
 
-# YOLOv5 directories
+
 backend_project/yolov5/
 yolov5/
-
-# Keep migration files (comment out the following line if you want to ignore them)
-# backend_project/apps/core/migrations/
+/media/images
+/media/labels
+/media/mlflow
+/media/raw
+/media/runs

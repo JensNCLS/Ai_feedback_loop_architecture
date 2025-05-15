@@ -19,3 +19,4 @@ celery==5.3.1
 redis
 mlflow
 minio==7.1.14
+dvc
