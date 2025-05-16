@@ -5,6 +5,7 @@ import HelpPanel from './HelpPanel';
 import PredictionsList from './PredictionsList';
 import ImageViewer from './ImageViewer';
 import FeedbackCommit from '../FeedbackCommit';
+import { CLASS_NAMES, getClassNumber } from '../../utils/classUtils';
 
 function ImageAnalysis() {
   // State variables
@@ -143,12 +144,17 @@ function ImageAnalysis() {
   const saveEditing = () => {
     if (editingItem === null) return;
 
+    // Calculate the class number based on the selected name
+    const className = tempName || CLASS_NAMES[0];
+    const classNumber = getClassNumber(className);
+
     setPredictions(prevPredictions => 
       prevPredictions.map((pred, i) => 
         i === editingItem 
           ? { 
               ...pred, 
-              name: tempName || "Unknown Finding", 
+              name: className,
+              class: classNumber, // Add class number
               confidence: Math.max(0, Math.min(100, tempConfidence)) / 100, 
               isModified: true 
             } 
@@ -189,13 +195,15 @@ function ImageAnalysis() {
       return;
     }
     
-    // Create a new prediction object
+    // Create a new prediction object with the first class as default
+    const defaultClassName = CLASS_NAMES[0];
     const newPrediction = {
       xmin,
       ymin,
       xmax,
       ymax,
-      name: "New Finding",
+      name: defaultClassName,
+      class: 0, // Default to first class
       confidence: 0.5,
       isModified: true,
       isNew: true

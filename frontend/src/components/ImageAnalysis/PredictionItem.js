@@ -1,4 +1,5 @@
 import React from 'react';
+import { CLASS_NAMES } from '../../utils/classUtils';
 
 const PredictionItem = ({ 
   pred, 
@@ -42,10 +43,9 @@ const PredictionItem = ({
         <>
           <div style={{ marginBottom: "8px" }}>
             <label style={{ display: "block", fontSize: "12px", color: "#7f8c8d", marginBottom: "2px" }}>
-              Finding Name:
+              Finding Type:
             </label>
-            <input
-              type="text"
+            <select
               value={tempName}
               onChange={(e) => setTempName(e.target.value)}
               style={{
@@ -53,11 +53,17 @@ const PredictionItem = ({
                 padding: "4px 6px",
                 border: "1px solid #bdc3c7",
                 borderRadius: "3px",
-                fontSize: "13px"
+                fontSize: "13px",
+                backgroundColor: "white"
               }}
-              placeholder="Enter finding name"
               autoFocus
-            />
+            >
+              {CLASS_NAMES.map((className, idx) => (
+                <option key={idx} value={className}>
+                  {className} (Class {idx})
+                </option>
+              ))}
+            </select>
           </div>
           
           <div style={{ marginBottom: "8px" }}>

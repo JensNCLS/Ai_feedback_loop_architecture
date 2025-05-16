@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import BoundingBox from '../ImageAnalysis/BoundingBox';
 import { getScaledImageDimensions } from '../../utils/imageUtils';
+import { CLASS_NAMES, getClassNumber } from '../../utils/classUtils';
 import './ReviewDetail.css';
 
 const ReviewDetail = () => {
@@ -184,13 +185,15 @@ const ReviewDetail = () => {
       return;
     }
     
-    // Create a new prediction object
+    // Create a new prediction object with the first class as default
+    const defaultClassName = CLASS_NAMES[0];
     const newPrediction = {
       xmin,
       ymin,
       xmax,
       ymax,
-      name: "New Finding",
+      name: defaultClassName,
+      class: 0, // Default to first class 
       confidence: 0.5,
       modified: true,
       isNew: true
@@ -413,13 +416,25 @@ const ReviewDetail = () => {
               <h3>Edit Prediction</h3>
               <div className="edit-form">
                 <div className="form-group">
-                  <label>Finding Name:</label>
-                  <input
-                    type="text"
+                  <label>Finding Type:</label>
+                  <select
                     value={selectedPrediction.name}
-                    onChange={(e) => updatePrediction({ name: e.target.value })}
+                    onChange={(e) => {
+                      const className = e.target.value;
+                      const classNumber = getClassNumber(className);
+                      updatePrediction({ 
+                        name: className, 
+                        class: classNumber 
+                      });
+                    }}
                     className="input-field"
-                  />
+                  >
+                    {CLASS_NAMES.map((className, idx) => (
+                      <option key={idx} value={className}>
+                        {className} (Class {idx})
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 
                 <div className="form-group">
