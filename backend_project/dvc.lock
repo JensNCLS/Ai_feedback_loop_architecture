@@ -75,3 +75,82 @@ stages:
       md5: 707ba420256b0f4e106260ad28cb4dee.dir
       size: 32462115
       nfiles: 18
+  first_reviewer_data_collection:
+    cmd: python manage.py fetch_first_reviewer_data
+    deps:
+    - path: apps/core/management/commands/fetch_first_reviewer_data.py
+      hash: md5
+      md5: 9fde79e7709ba8799b62830a75d8caa8
+      size: 674
+    - path: apps/core/retraining/data_collection_first_reviewer.py
+      hash: md5
+      md5: 13ee6fe6802b20ad9727dcefa4b40abc
+      size: 3020
+    outs:
+    - path: media/raw_first_reviewer
+      hash: md5
+      md5: 6dd791d69047de7fd1a50c648fa763fb.dir
+      size: 9531
+      nfiles: 1
+  first_reviewer_data_formatting:
+    cmd: python3 manage.py format_first_reviewer_data
+    deps:
+    - path: apps/core/management/commands/format_first_reviewer_data.py
+      hash: md5
+      md5: 3ebf8656ac71228d2965988646ece89a
+      size: 842
+    - path: apps/core/retraining/data_formatting_first_reviewer.py
+      hash: md5
+      md5: a3a0d13c15ef2da108030a60a92d6621
+      size: 6850
+    - path: media/raw_first_reviewer
+      hash: md5
+      md5: 6dd791d69047de7fd1a50c648fa763fb.dir
+      size: 9531
+      nfiles: 1
+    outs:
+    - path: media/dataset_first_reviewer.yaml
+      hash: md5
+      md5: e817370e5b03f5ea030cd0f706ef1880
+      size: 177
+    - path: media/images_first_reviewer
+      hash: md5
+      md5: 87286bea6eb9254b4ea8a0d94227736b.dir
+      size: 28492287
+      nfiles: 4
+    - path: media/labels_first_reviewer
+      hash: md5
+      md5: 48c61f9904a4bedde32d25b36c0add1c.dir
+      size: 1174
+      nfiles: 4
+  first_reviewer_model_training:
+    cmd: python3 manage.py train_first_reviewer_model
+    deps:
+    - path: apps/core/management/commands/train_first_reviewer_model.py
+      hash: md5
+      md5: c0400232819e4a80f2830037d66fb296
+      size: 784
+    - path: apps/core/retraining/retraining_first_reviewer.py
+      hash: md5
+      md5: 5ddd8d7029378ca3374dbbec341b82cf
+      size: 6769
+    - path: media/dataset_first_reviewer.yaml
+      hash: md5
+      md5: e817370e5b03f5ea030cd0f706ef1880
+      size: 177
+    - path: media/images_first_reviewer
+      hash: md5
+      md5: c72d6f88e4efb29342e11c07e81d1638.dir
+      size: 28492948
+      nfiles: 5
+    - path: media/labels_first_reviewer
+      hash: md5
+      md5: 48c61f9904a4bedde32d25b36c0add1c.dir
+      size: 1174
+      nfiles: 4
+    outs:
+    - path: media/runs/train_first_reviewer
+      hash: md5
+      md5: cd1f45f1baaa193fcfa122b64f5ea035.dir
+      size: 1563
+      nfiles: 2

@@ -35,9 +35,11 @@ workspace.xml
 
 # Static and media files
 data/raw_images/
-# Ignore all media files but not dataset.yaml
+# Ignore all media files except specified files
 backend_project/media/*
 !backend_project/media/dataset.yaml
+!backend_project/media/dataset_first_reviewer.yaml
+!backend_project/media/.gitignore
 backend/media/
 
 # MLflow tracking files
