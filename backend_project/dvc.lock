@@ -14,8 +14,8 @@ stages:
     outs:
     - path: media/raw
       hash: md5
-      md5: b4402ac61ee850e6842f550f0674a6ef.dir
-      size: 20756
+      md5: 4498cff5c96a4c246ff02a96e37789ff.dir
+      size: 40426
       nfiles: 1
   data_formatting:
     cmd: python manage.py format_training_data
@@ -26,19 +26,24 @@ stages:
       size: 595
     - path: apps/core/retraining/data_formatting.py
       hash: md5
-      md5: eb759986526916e8be05c1e9f9b940da
-      size: 8141
+      md5: f736ce4f3b4df9a95efddfd735665491
+      size: 6200
+    - path: media/raw
+      hash: md5
+      md5: 4498cff5c96a4c246ff02a96e37789ff.dir
+      size: 40426
+      nfiles: 1
     outs:
     - path: media/images
       hash: md5
-      md5: 9535f5257c57b4a3cd74238ff3167f06.dir
-      size: 50697823
-      nfiles: 7
+      md5: b162c6711fca5ccc2a267162e3879986.dir
+      size: 137379835
+      nfiles: 19
     - path: media/labels
       hash: md5
-      md5: 203ac871fb7821f407e22788386ae213.dir
-      size: 2615
-      nfiles: 7
+      md5: 7de81549fbce3c336a9234063fbd1687.dir
+      size: 13099
+      nfiles: 21
   model_training:
     cmd: python manage.py train_model
     deps:
@@ -48,25 +53,25 @@ stages:
       size: 709
     - path: apps/core/retraining/retraining.py
       hash: md5
-      md5: 3800f2b7a304eac0eecb80591ff75944
-      size: 8542
+      md5: b28117de96c5ad3e693e1b1e304b64b7
+      size: 9460
     - path: media/dataset.yaml
       hash: md5
       md5: 1536935dd27e788f29f03efb87f36029
       size: 216
     - path: media/images
       hash: md5
-      md5: 9535f5257c57b4a3cd74238ff3167f06.dir
-      size: 50697823
-      nfiles: 7
+      md5: b162c6711fca5ccc2a267162e3879986.dir
+      size: 137379835
+      nfiles: 19
     - path: media/labels
       hash: md5
-      md5: b510a6683c34db24d99624e1e6212913.dir
-      size: 5599
-      nfiles: 9
+      md5: b5898a669e72cfec318ee3627eb3f9f9.dir
+      size: 13331
+      nfiles: 21
     outs:
     - path: media/runs/train
       hash: md5
-      md5: 5b75c8a4329025b90dcb216383200bc8.dir
-      size: 31034740
+      md5: 707ba420256b0f4e106260ad28cb4dee.dir
+      size: 32462115
       nfiles: 18

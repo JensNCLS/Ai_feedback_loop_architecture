@@ -5,15 +5,19 @@ stages:
     - apps/core/management/commands/fetch_training_data.py
     - apps/core/retraining/data_collection.py
     outs:
-    - media/raw
+    - media/raw:
+        persist: true
   data_formatting:
     cmd: python manage.py format_training_data
     deps:
     - apps/core/management/commands/format_training_data.py
     - apps/core/retraining/data_formatting.py
+    - media/raw
     outs:
-    - media/images
-    - media/labels
+    - media/images:
+        persist: true
+    - media/labels:
+        persist: true
   model_training:
     cmd: python manage.py train_model
     deps:
@@ -23,4 +27,5 @@ stages:
     - media/labels
     - media/dataset.yaml
     outs:
-    - media/runs/train
+    - media/runs/train:
+        persist: true
