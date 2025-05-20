@@ -19,7 +19,13 @@ services:
       - db
       - ai_models
       - redis
-    shm_size: '4gb'  # Increased shared memory for ML training
+    shm_size: '6gb'  # Increased shared memory for ML training
+    deploy:
+      resources:
+        limits:
+          memory: 5G  # Increased memory limit
+        reservations:
+          memory: 2G  # Guaranteed minimum memory
 
   ai_models:
     build:

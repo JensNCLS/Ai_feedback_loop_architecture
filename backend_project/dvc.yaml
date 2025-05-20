@@ -1,12 +1,12 @@
 stages:
+
   data_collection:
     cmd: python manage.py fetch_training_data
     deps:
     - apps/core/management/commands/fetch_training_data.py
     - apps/core/retraining/data_collection.py
     outs:
-    - media/raw:
-        persist: true
+    - media/raw
   data_formatting:
     cmd: python manage.py format_training_data
     deps:
@@ -14,10 +14,8 @@ stages:
     - apps/core/retraining/data_formatting.py
     - media/raw
     outs:
-    - media/images:
-        persist: true
-    - media/labels:
-        persist: true
+    - media/images
+    - media/labels
   model_training:
     cmd: python manage.py train_model
     deps:
@@ -27,5 +25,32 @@ stages:
     - media/labels
     - media/dataset.yaml
     outs:
-    - media/runs/train:
-        persist: true
+    - media/runs/train
+
+ 
+  first_reviewer_data_collection:
+    cmd: python manage.py fetch_first_reviewer_data
+    deps:
+    - apps/core/management/commands/fetch_first_reviewer_data.py
+    - apps/core/retraining/data_collection_first_reviewer.py
+    outs:
+    - media/raw_first_reviewer
+  first_reviewer_data_formatting:
+    cmd: python manage.py format_first_reviewer_data
+    deps:
+    - apps/core/management/commands/format_first_reviewer_data.py
+    - apps/core/retraining/data_formatting_first_reviewer.py
+    - media/raw_first_reviewer
+    outs:
+    - media/images_first_reviewer
+    - media/labels_first_reviewer
+  first_reviewer_model_training:
+    cmd: python manage.py train_first_reviewer_model
+    deps:
+    - apps/core/management/commands/train_first_reviewer_model.py
+    - apps/core/retraining/retraining_first_reviewer.py
+    - media/images_first_reviewer
+    - media/labels_first_reviewer
+    - media/dataset.yaml
+    outs:
+    - media/runs/train_first_reviewer

@@ -6,6 +6,7 @@ from io import BytesIO
 import random
 from ..utils import get_image_from_minio
 import json
+import yaml
 
 logger = get_logger()
 
@@ -24,22 +25,27 @@ def log_method_call(func):
     return wrapper
 
 @log_method_call
-def format_training_data():
+def format_first_reviewer_training_data():
     try:
         processed_count = 0
         class_names_set = set()
         
         base_dir = Path(__file__).parent.parent.parent.parent / "media"
-        images_train_dir = base_dir / "images" / "train"
-        images_val_dir = base_dir / "images" / "val"
-        labels_train_dir = base_dir / "labels" / "train"
-        labels_val_dir = base_dir / "labels" / "val"
-        data_dir = base_dir / "raw"
+        images_train_dir = base_dir / "images_first_reviewer" / "train"
+        images_val_dir = base_dir / "images_first_reviewer" / "val"
+        labels_train_dir = base_dir / "labels_first_reviewer" / "train"
+        labels_val_dir = base_dir / "labels_first_reviewer" / "val"
+        data_dir = base_dir / "raw_first_reviewer"
         
+        # Clear previous data to prevent accumulation
+        import shutil
         for dir_path in [images_train_dir, images_val_dir, labels_train_dir, labels_val_dir]:
+            if dir_path.exists():
+                logger.info(f"Cleaning directory: {dir_path}")
+                shutil.rmtree(dir_path)
             dir_path.mkdir(parents=True, exist_ok=True)
         
-        json_path = data_dir / "feedback_images.json"
+        json_path = data_dir / "feedback_images_first_reviewer.json"
         
         with open(json_path, 'r') as f:
             feedback_images = json.load(f)
@@ -140,5 +146,5 @@ def format_training_data():
         }
         
     except Exception as e:
-        logger.error(f"Error in format_training_data: {e}")
+        logger.error(f"Error in format_first_reviewer_training_data: {e}")
         return {"status": "failure", "message": str(e), "count": 0}

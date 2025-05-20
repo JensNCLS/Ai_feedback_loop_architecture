@@ -23,16 +23,16 @@ def log_method_call(func):
     return wrapper
 
 @log_method_call
-def retraining():
+def retraining_first_reviewer():
     try:
         # Step 1: Load the processed data from previous DVC step
         project_root = Path(__file__).parent.parent.parent.parent
-        json_path = project_root / "media" / "raw" / "feedback_images.json"
+        json_path = project_root / "media" / "raw_first_reviewer" / "feedback_images_first_reviewer.json"
         
         # Check if the JSON file exists
         if not json_path.exists():
-            logger.error(f"Training data file not found at {json_path}")
-            return {"status": "failure", "message": f"Training data file not found at {json_path}"}
+            logger.error(f"First reviewer training data file not found at {json_path}")
+            return {"status": "failure", "message": f"First reviewer training data file not found at {json_path}"}
             
         # Load the data from JSON file
         try:
@@ -41,12 +41,12 @@ def retraining():
             
             # Check if we have a valid list of feedback images
             if not isinstance(feedback_images, list):
-                logger.error("Feedback images JSON is not a list")
-                return {"status": "failure", "message": "Feedback images JSON is not a list"}
+                logger.error("First reviewer feedback images JSON is not a list")
+                return {"status": "failure", "message": "First reviewer feedback images JSON is not a list"}
                 
             if len(feedback_images) == 0:
-                logger.info("No images to train on, skipping training")
-                return {"status": "success", "message": "No images to train on", "count": 0}
+                logger.info("No first reviewer images to train on, skipping training")
+                return {"status": "success", "message": "No first reviewer images to train on", "count": 0}
                 
             # Create a data_results dictionary with feedback images and metadata
             data_results = {
@@ -66,17 +66,17 @@ def retraining():
             
             data_results["class_names"] = list(class_names)
         except Exception as e:
-            logger.error(f"Error loading training data: {e}")
-            return {"status": "failure", "message": f"Error loading training data: {e}"}
+            logger.error(f"Error loading first reviewer training data: {e}")
+            return {"status": "failure", "message": f"Error loading first reviewer training data: {e}"}
         
         # Step 2: Run YOLOv5 training
-        logger.info("Starting YOLOv5 training")
+        logger.info("Starting YOLOv5 training for first reviewer data")
         
         # Setup paths
         project_root = Path(__file__).parent.parent.parent.parent
         yolov5_dir = project_root / "yolov5"
         dataset_yaml = project_root / "media" / "dataset.yaml"
-        output_dir = project_root / "media" / "runs" / "train"
+        output_dir = project_root / "media" / "runs" / "train_first_reviewer"
         weights_path = yolov5_dir / "best.pt"
         
         # Ensure output directory exists
@@ -88,16 +88,16 @@ def retraining():
             str(yolov5_dir / "train.py"),
             "--img", "640",
             "--batch", "8",
-            "--epochs", "20",
+            "--epochs", "20",  # Same as original pipeline
             "--data", str(dataset_yaml),
             "--weights", str(weights_path),
             "--project", str(output_dir),
             "--name", "exp",
             "--workers", "2",
             "--cache",
-            "--patience", "5"
+            "--patience", "5"  # Early stopping: stop if no improvement after 5 epochs
         ]
-
+        
         logger.info(f"Running training command: {' '.join(cmd)}")
 
         try:
@@ -146,12 +146,12 @@ def retraining():
                 try:
                     mlflow.set_tracking_uri("http://mlflow:5000")
 
-                    with mlflow.start_run(run_name="feedback_retraining") as run:
+                    with mlflow.start_run(run_name="feedback_first_reviewer_retraining") as run:
                         run_id = run.info.run_id
 
                         # Log parameters
-                        mlflow.log_param("epochs", 20)
-                        mlflow.log_param("batch_size", 8)
+                        mlflow.log_param("epochs", 20)  # Updated to match the new value
+                        mlflow.log_param("batch_size", 8)  # Fixed to match actual batch size used in training
                         mlflow.log_param("image_size", 640)
                         mlflow.log_param("images_processed", data_results.get("count", 0))
                         mlflow.log_param("class_names", str(data_results.get("class_names", [])))
@@ -170,17 +170,19 @@ def retraining():
                         if weights_dir.exists():
                             mlflow.log_artifacts(str(weights_dir), artifact_path="weights")
 
+                        # Register model
                         model_uri = f"runs:/{run_id}/weights/{best_model_path.name}"
                         registered_model = mlflow.register_model(
                             model_uri,
-                            "skincancer_detection_model"
+                            "skincancer_detection_model_first_reviewer"
                         )
 
                         logger.info(f"Registered model version: {registered_model.version}")
 
+                        # Promote to Production
                         client = mlflow.tracking.MlflowClient()
                         client.transition_model_version_stage(
-                            name="skincancer_detection_model",
+                            name="skincancer_detection_model_first_reviewer",
                             version=registered_model.version,
                             stage="Production"
                         )

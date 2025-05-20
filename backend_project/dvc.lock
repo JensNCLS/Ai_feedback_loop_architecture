@@ -26,8 +26,8 @@ stages:
       size: 595
     - path: apps/core/retraining/data_formatting.py
       hash: md5
-      md5: f736ce4f3b4df9a95efddfd735665491
-      size: 6200
+      md5: 3221ab10006e4c416acd1b51e0502b69
+      size: 6190
     - path: media/raw
       hash: md5
       md5: 4498cff5c96a4c246ff02a96e37789ff.dir
@@ -36,14 +36,14 @@ stages:
     outs:
     - path: media/images
       hash: md5
-      md5: b162c6711fca5ccc2a267162e3879986.dir
-      size: 137379835
-      nfiles: 19
+      md5: 895274e7257d8029e77a09a1169df8c6.dir
+      size: 144424192
+      nfiles: 20
     - path: media/labels
       hash: md5
-      md5: 7de81549fbce3c336a9234063fbd1687.dir
-      size: 13099
-      nfiles: 21
+      md5: f19f1e2101ac4c7fb1780a085f15d7f2.dir
+      size: 11848
+      nfiles: 22
   model_training:
     cmd: python manage.py train_model
     deps:
@@ -53,27 +53,27 @@ stages:
       size: 709
     - path: apps/core/retraining/retraining.py
       hash: md5
-      md5: b28117de96c5ad3e693e1b1e304b64b7
-      size: 9460
+      md5: 65b97d064b3bcb7ae5704f81215288f4
+      size: 9447
     - path: media/dataset.yaml
       hash: md5
       md5: 1536935dd27e788f29f03efb87f36029
       size: 216
     - path: media/images
       hash: md5
-      md5: b162c6711fca5ccc2a267162e3879986.dir
-      size: 137379835
-      nfiles: 19
+      md5: 895274e7257d8029e77a09a1169df8c6.dir
+      size: 144424192
+      nfiles: 20
     - path: media/labels
       hash: md5
-      md5: b5898a669e72cfec318ee3627eb3f9f9.dir
-      size: 13331
-      nfiles: 21
+      md5: 4dc103e9aeec054b9082e38b06149c4c.dir
+      size: 13967
+      nfiles: 22
     outs:
     - path: media/runs/train
       hash: md5
-      md5: 707ba420256b0f4e106260ad28cb4dee.dir
-      size: 32462115
+      md5: f952353167c820eea74919902a1be6ad.dir
+      size: 32316899
       nfiles: 18
   first_reviewer_data_collection:
     cmd: python manage.py fetch_first_reviewer_data
@@ -84,47 +84,43 @@ stages:
       size: 674
     - path: apps/core/retraining/data_collection_first_reviewer.py
       hash: md5
-      md5: 13ee6fe6802b20ad9727dcefa4b40abc
-      size: 3020
+      md5: ab8eaf97d5cc9de79434ec4827ec5d30
+      size: 2663
     outs:
     - path: media/raw_first_reviewer
       hash: md5
-      md5: 6dd791d69047de7fd1a50c648fa763fb.dir
+      md5: 77d1a22f6da38655638d57c71898cc1a.dir
       size: 9531
       nfiles: 1
   first_reviewer_data_formatting:
-    cmd: python3 manage.py format_first_reviewer_data
+    cmd: python manage.py format_first_reviewer_data
     deps:
     - path: apps/core/management/commands/format_first_reviewer_data.py
       hash: md5
-      md5: 3ebf8656ac71228d2965988646ece89a
-      size: 842
+      md5: d3ea0f4b224957c7bd7d18e8af7ffa1d
+      size: 685
     - path: apps/core/retraining/data_formatting_first_reviewer.py
       hash: md5
-      md5: a3a0d13c15ef2da108030a60a92d6621
-      size: 6850
+      md5: 6f0eed2c680c3139e63aa28002f16ca5
+      size: 6535
     - path: media/raw_first_reviewer
       hash: md5
-      md5: 6dd791d69047de7fd1a50c648fa763fb.dir
+      md5: 77d1a22f6da38655638d57c71898cc1a.dir
       size: 9531
       nfiles: 1
     outs:
-    - path: media/dataset_first_reviewer.yaml
-      hash: md5
-      md5: e817370e5b03f5ea030cd0f706ef1880
-      size: 177
     - path: media/images_first_reviewer
       hash: md5
-      md5: 87286bea6eb9254b4ea8a0d94227736b.dir
+      md5: 331fdf36b2d2474044b6dd46db957d31.dir
       size: 28492287
       nfiles: 4
     - path: media/labels_first_reviewer
       hash: md5
-      md5: 48c61f9904a4bedde32d25b36c0add1c.dir
+      md5: 3e8468624cfda5f1b2615f8e0ba3a43f.dir
       size: 1174
       nfiles: 4
   first_reviewer_model_training:
-    cmd: python3 manage.py train_first_reviewer_model
+    cmd: python manage.py train_first_reviewer_model
     deps:
     - path: apps/core/management/commands/train_first_reviewer_model.py
       hash: md5
@@ -132,25 +128,25 @@ stages:
       size: 784
     - path: apps/core/retraining/retraining_first_reviewer.py
       hash: md5
-      md5: 5ddd8d7029378ca3374dbbec341b82cf
-      size: 6769
-    - path: media/dataset_first_reviewer.yaml
+      md5: fd956f72d981b8a0fc7160e3d7e51c1f
+      size: 9619
+    - path: media/dataset.yaml
       hash: md5
-      md5: e817370e5b03f5ea030cd0f706ef1880
-      size: 177
+      md5: 1536935dd27e788f29f03efb87f36029
+      size: 216
     - path: media/images_first_reviewer
       hash: md5
-      md5: c72d6f88e4efb29342e11c07e81d1638.dir
-      size: 28492948
-      nfiles: 5
+      md5: 331fdf36b2d2474044b6dd46db957d31.dir
+      size: 28492287
+      nfiles: 4
     - path: media/labels_first_reviewer
       hash: md5
-      md5: 48c61f9904a4bedde32d25b36c0add1c.dir
+      md5: 3e8468624cfda5f1b2615f8e0ba3a43f.dir
       size: 1174
       nfiles: 4
     outs:
     - path: media/runs/train_first_reviewer
       hash: md5
-      md5: cd1f45f1baaa193fcfa122b64f5ea035.dir
-      size: 1563
-      nfiles: 2
+      md5: 49f185ffcfea862e6a344531a526d65b.dir
+      size: 32317339
+      nfiles: 18
