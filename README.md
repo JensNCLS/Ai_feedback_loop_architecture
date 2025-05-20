@@ -19,21 +19,7 @@ This project aims to create a robust architecture for AI systems that integrates
 - **(Partial) EU AI Act Compliance**: Ensures every process is logged.
 - **Architecture**: Modular design with separate services for backend, frontend, database, and AI models.
 - **MLflow Integration**: Tracks experiments, models, and artifacts.
-
-## Project Structure
-
-The project is organized as follows:
-
-```
-Ai_feedback_loop_architecture/
-├── backend/          # Backend service (Django REST API)
-├── frontend/         # Frontend service (React application)
-├── ai_models/        # AI models and training scripts
-├── database/         # Database configuration and migrations
-├── mlflow/           # MLflow tracking server setup
-├── docker-compose.yml # Docker Compose configuration
-└── README.md         # Project documentation
-```
+- **DVC Integration**: AI Pipeline and data versioning
 
 ## Setup Instructions
 
@@ -69,5 +55,6 @@ Ai_feedback_loop_architecture/
  - **Backend:** http://localhost:8000
  - **MLflow:** http://localhost:5001
  - **pgAdmin:** http://localhost:5050
+ - **MiniO** http://localhost:9001
 
 

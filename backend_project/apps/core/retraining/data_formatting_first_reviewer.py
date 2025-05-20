@@ -37,12 +37,7 @@ def format_first_reviewer_training_data():
         labels_val_dir = base_dir / "labels_first_reviewer" / "val"
         data_dir = base_dir / "raw_first_reviewer"
         
-        # Clear previous data to prevent accumulation
-        import shutil
         for dir_path in [images_train_dir, images_val_dir, labels_train_dir, labels_val_dir]:
-            if dir_path.exists():
-                logger.info(f"Cleaning directory: {dir_path}")
-                shutil.rmtree(dir_path)
             dir_path.mkdir(parents=True, exist_ok=True)
         
         json_path = data_dir / "feedback_images_first_reviewer.json"

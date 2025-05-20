@@ -46,7 +46,6 @@ def fetch_first_reviewer_training_data():
             }
             data.append(row)
         
-        # Convert Django model objects to JSON-serializable format
         def json_serializer(obj):
             try:
                 return obj.isoformat() if hasattr(obj, 'isoformat') else str(obj)

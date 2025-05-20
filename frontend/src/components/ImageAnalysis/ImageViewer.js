@@ -25,7 +25,6 @@ const ImageViewer = ({
     return <p style={{ fontSize: "16px", color: "#7f8c8d" }}>No image uploaded.</p>;
   }
 
-  // No results notification
   const noResultsNotification = analysisStatus === "completed" && predictions.length === 0 && (
     <div 
       style={{
@@ -47,7 +46,6 @@ const ImageViewer = ({
     </div>
   );
 
-  // Analyzing overlay
   const analyzingOverlay = analyzing && (
     <div
       style={{
@@ -86,12 +84,10 @@ const ImageViewer = ({
     </div>
   );
 
-  // Drawing box
   const drawingBoxElement = showDrawingBox && !analyzing && (
     <div style={drawingBoxStyle}></div>
   );
 
-  // Bounding boxes for predictions
   const boundingBoxes = predictions.map((pred, index) => {
     const { width, height, naturalWidth, naturalHeight } = getScaledImageDimensions(imgRef);
     

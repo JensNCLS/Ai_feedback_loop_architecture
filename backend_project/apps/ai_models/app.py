@@ -16,13 +16,10 @@ async def root():
 @app.post("/predict/")
 async def predict_endpoint(image: UploadFile = File(...)):
     try:
-        # Read the uploaded image
         image_data = await image.read()
         
-        # Analyze the image using the loaded model
         predictions = analyze_image(image_data)
         
-        # Return the predictions
         return {
             "success": True,
             "predictions": predictions

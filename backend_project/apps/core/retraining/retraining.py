@@ -25,21 +25,17 @@ def log_method_call(func):
 @log_method_call
 def retraining():
     try:
-        # Step 1: Load the processed data from previous DVC step
         project_root = Path(__file__).parent.parent.parent.parent
         json_path = project_root / "media" / "raw" / "feedback_images.json"
         
-        # Check if the JSON file exists
         if not json_path.exists():
             logger.error(f"Training data file not found at {json_path}")
             return {"status": "failure", "message": f"Training data file not found at {json_path}"}
             
-        # Load the data from JSON file
         try:
             with open(json_path, 'r') as f:
                 feedback_images = json.load(f)
             
-            # Check if we have a valid list of feedback images
             if not isinstance(feedback_images, list):
                 logger.error("Feedback images JSON is not a list")
                 return {"status": "failure", "message": "Feedback images JSON is not a list"}
@@ -48,7 +44,6 @@ def retraining():
                 logger.info("No images to train on, skipping training")
                 return {"status": "success", "message": "No images to train on", "count": 0}
                 
-            # Create a data_results dictionary with feedback images and metadata
             data_results = {
                 "status": "success",
                 "count": len(feedback_images),
@@ -56,7 +51,6 @@ def retraining():
                 "class_names": []
             }
             
-            # Extract unique class names from feedback data
             class_names = set()
             for img in feedback_images:
                 if img.get("feedback_data"):
@@ -69,20 +63,16 @@ def retraining():
             logger.error(f"Error loading training data: {e}")
             return {"status": "failure", "message": f"Error loading training data: {e}"}
         
-        # Step 2: Run YOLOv5 training
         logger.info("Starting YOLOv5 training")
         
-        # Setup paths
         project_root = Path(__file__).parent.parent.parent.parent
         yolov5_dir = project_root / "yolov5"
         dataset_yaml = project_root / "media" / "dataset.yaml"
         output_dir = project_root / "media" / "runs" / "train"
         weights_path = yolov5_dir / "best.pt"
         
-        # Ensure output directory exists
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Build YOLOv5 training command
         cmd = [
             sys.executable,
             str(yolov5_dir / "train.py"),
@@ -101,19 +91,17 @@ def retraining():
         logger.info(f"Running training command: {' '.join(cmd)}")
 
         try:
-            # Run with output capture to better diagnose issues
             process = subprocess.run(
                 cmd,
-                check=False,  # Handle return code manually
-                capture_output=True,  # Capture output to diagnose issues
-                text=True  # Convert output to text
+                check=False,
+                capture_output=True,
+                text=True
             )
             
             if process.returncode != 0:
                 logger.error(f"Training process failed with code {process.returncode}")
                 logger.error(f"Error output: {process.stderr[:500]}...")  # Log first 500 chars of stderr
                 
-                # Check for memory-related errors
                 if process.returncode == -9 or "out of memory" in process.stderr.lower() or "killed" in process.stderr.lower():
                     error_msg = "Training process was killed due to memory limitations. Try reducing batch size or image resolution."
                 else:
@@ -122,12 +110,11 @@ def retraining():
                 return {
                     "status": "failure",
                     "message": error_msg,
-                    "stderr": process.stderr[:1000]  # Include truncated stderr for debugging
+                    "stderr": process.stderr[:1000]
                 }
                 
             logger.info("Training completed successfully")
 
-            # Find latest exp folder
             def get_latest_exp_dir(base_dir):
                 exp_dirs = list(Path(base_dir).glob("exp*"))
                 return max(exp_dirs, key=lambda d: d.stat().st_mtime)
@@ -141,7 +128,6 @@ def retraining():
                 if pt_files:
                     best_model_path = pt_files[0]
 
-            # MLflow logging
             if best_model_path:
                 try:
                     mlflow.set_tracking_uri("http://mlflow:5000")
@@ -149,7 +135,6 @@ def retraining():
                     with mlflow.start_run(run_name="feedback_retraining") as run:
                         run_id = run.info.run_id
 
-                        # Log parameters
                         mlflow.log_param("epochs", 20)
                         mlflow.log_param("batch_size", 8)
                         mlflow.log_param("image_size", 640)
@@ -158,10 +143,8 @@ def retraining():
                         mlflow.log_param("python_version", platform.python_version())
                         mlflow.log_param("system_platform", platform.platform())
 
-                        # Log the best model
                         mlflow.log_artifact(output_dir / "exp" / "results.png")
 
-                        # Log other artifacts
                         for file_name in ["results.png", "opt.yaml", "hyp.yaml"]:
                             file_path = exp_dir / file_name
                             if file_path.exists():

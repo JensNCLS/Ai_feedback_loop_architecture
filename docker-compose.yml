@@ -10,7 +10,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend_project:/app
-      - model_storage:/app/shared_models  # Shared volume for model storage
+      - model_storage:/app/shared_models
       - mlflow_data:/app/media/mlflow/artifacts
     environment:
       - DJANGO_SETTINGS_MODULE=backend.settings
@@ -19,13 +19,13 @@ services:
       - db
       - ai_models
       - redis
-    shm_size: '6gb'  # Increased shared memory for ML training
+    shm_size: '6gb'
     deploy:
       resources:
         limits:
-          memory: 5G  # Increased memory limit
+          memory: 5G
         reservations:
-          memory: 2G  # Guaranteed minimum memory
+          memory: 2G
 
   ai_models:
     build:
@@ -38,7 +38,7 @@ services:
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
     volumes:
-      - model_storage:/app/shared_models  # Same shared volume for model storage
+      - model_storage:/app/shared_models
 
   db:
     image: postgres:15

@@ -33,20 +33,16 @@ def upload_image(request):
             image_file = request.FILES['image']
             image_data = image_file.read()
             
-            # Upload image to MinIO
             bucket_name, object_name = upload_image_to_minio(image_data, image_file.name)
             
-            # Create the preprocessed image with MinIO storage info
             preprocessed_image = PreprocessedImage.objects.create(
                 original_filename=image_file.name,
                 bucket_name=bucket_name,
                 object_name=object_name
             )
 
-            # Asynchronously trigger the analysis task directly
             analyze_image_task.delay(preprocessed_image.id)
             
-            # Return the preprocessed_image_id that the frontend expects
             return JsonResponse({
                 "success": True,
                 "message": "Image successfully uploaded and analysis started!",

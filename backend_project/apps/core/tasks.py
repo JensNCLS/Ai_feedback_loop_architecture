@@ -22,7 +22,6 @@ def analyze_image_task(preprocessed_image_id):
 @shared_task
 def process_unreviewed_feedback_task(preprocessed_image_id, analyzed_image_id, feedback_data, feedback_text=None):
     try:
-        # Get the related objects
         preprocessed_image = PreprocessedImage.objects.get(id=preprocessed_image_id)
         analyzed_image = AnalyzedImage.objects.get(id=analyzed_image_id)
         
@@ -45,26 +44,19 @@ def process_unreviewed_feedback_task(preprocessed_image_id, analyzed_image_id, f
 @shared_task
 def process_feedback_task(preprocessed_image_id, analyzed_image_id, feedback_data, feedback_text=None):
     try:
-
-        # Get the related objects
         preprocessed_image = PreprocessedImage.objects.get(id=preprocessed_image_id)
         analyzed_image = AnalyzedImage.objects.get(id=analyzed_image_id)
         
-        # Compare AI predictions with feedback and check if it needs review
         needs_review = False
         comparison_result = None
-        # Initialize status with default value
         status = 'reviewed'
         
-        # First, check for the case where AI found nothing but dermatologist did
         ai_predictions = []
         if analyzed_image and analyzed_image.analysis_results:
             ai_predictions = analyzed_image.analysis_results
             
-        # Flag for review if AI found nothing but dermatologist did find lesions
         if len(ai_predictions) == 0 and len(feedback_data) > 0:
             needs_review = True
-            # Create a basic comparison result for UI display
             comparison_result = {
                 'needs_review': True,
                 'summary': {
@@ -79,11 +71,9 @@ def process_feedback_task(preprocessed_image_id, analyzed_image_id, feedback_dat
             }
             logger.warning(f"Image {preprocessed_image_id} flagged for review: AI detected nothing but dermatologist found {len(feedback_data)} lesions")
             status = "pending"
-        # Otherwise run the normal comparison if there are AI predictions
+
         elif len(ai_predictions) > 0:
             try:
-                
-                # Run comparison check
                 comparison_result = flag_for_review_check(
                     ai_predictions, 
                     feedback_data
@@ -91,7 +81,6 @@ def process_feedback_task(preprocessed_image_id, analyzed_image_id, feedback_dat
                 
                 needs_review = comparison_result['needs_review']
                 
-                # Log the comparison results
                 logger.info(f"Prediction comparison for image {preprocessed_image_id}: "
                             f"Matches: {comparison_result['summary']['match_count']}, "
                             f"Missed detections: {comparison_result['summary']['missed_detection_count']}, "

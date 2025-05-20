@@ -39,7 +39,6 @@ const PredictionItem = ({
       onClick={() => !isEditing && startEditing(index, pred)}
     >
       {isEditing ? (
-        // Editing Mode UI
         <>
           <div style={{ marginBottom: "8px" }}>
             <label style={{ display: "block", fontSize: "12px", color: "#7f8c8d", marginBottom: "2px" }}>

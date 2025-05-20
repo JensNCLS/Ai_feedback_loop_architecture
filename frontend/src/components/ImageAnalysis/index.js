@@ -8,7 +8,6 @@ import FeedbackCommit from '../FeedbackCommit';
 import { CLASS_NAMES, getClassNumber } from '../../utils/classUtils';
 
 function ImageAnalysis() {
-  // State variables
   const [image, setImage] = useState(null);
   const [predictions, setPredictions] = useState([]);
   const [imageUrl, setImageUrl] = useState("");
@@ -28,11 +27,9 @@ function ImageAnalysis() {
   const [tempName, setTempName] = useState("");
   const [tempConfidence, setTempConfidence] = useState(50);
   
-  // Refs
   const imgRef = useRef(null);
   const imageContainerRef = useRef(null);
 
-  // Handle image selection
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -46,7 +43,6 @@ function ImageAnalysis() {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -86,7 +82,6 @@ function ImageAnalysis() {
     }
   };
 
-  // Poll for analysis status
   useEffect(() => {
     if (!preprocessedImageId) return;
 
@@ -124,7 +119,6 @@ function ImageAnalysis() {
     return () => clearInterval(intervalId);
   }, [preprocessedImageId]);
 
-  // Handle bounding box changes
   const handleBoxChange = (index, newBox) => {
     setPredictions((prevPredictions) =>
       prevPredictions.map((pred, i) =>
@@ -133,18 +127,16 @@ function ImageAnalysis() {
     );
   };
 
-  // Start editing a prediction
   const startEditing = (index, pred) => {
     setEditingItem(index);
     setTempName(pred.name);
     setTempConfidence(pred.confidence * 100);
   };
 
-  // Save editing changes
+
   const saveEditing = () => {
     if (editingItem === null) return;
 
-    // Calculate the class number based on the selected name
     const className = tempName || CLASS_NAMES[0];
     const classNumber = getClassNumber(className);
 
@@ -154,7 +146,7 @@ function ImageAnalysis() {
           ? { 
               ...pred, 
               name: className,
-              class: classNumber, // Add class number
+              class: classNumber,
               confidence: Math.max(0, Math.min(100, tempConfidence)) / 100, 
               isModified: true 
             } 
@@ -165,7 +157,6 @@ function ImageAnalysis() {
     setEditingItem(null);
   };
 
-  // Add a new bounding box
   const addNewBox = () => {
     if (!showDrawingBox) return;
     
@@ -173,29 +164,24 @@ function ImageAnalysis() {
     const { naturalWidth, naturalHeight } = imgElement;
     const containerRect = imageContainerRef.current.getBoundingClientRect();
     
-    // Convert drawing coordinates to natural image coordinates
     const scaleX = naturalWidth / containerRect.width;
     const scaleY = naturalHeight / containerRect.height;
     
-    // Calculate the correct coordinates
     const startX = Math.min(drawStart.x, drawEnd.x);
     const startY = Math.min(drawStart.y, drawEnd.y);
     const endX = Math.max(drawStart.x, drawEnd.x);
     const endY = Math.max(drawStart.y, drawEnd.y);
     
-    // Convert to image coordinates
     const xmin = startX * scaleX;
     const ymin = startY * scaleY;
     const xmax = endX * scaleX;
     const ymax = endY * scaleY;
 
-    // Minimum size check (at least 10x10 pixels)
     if ((endX - startX) < 10 || (endY - startY) < 10) {
       setShowDrawingBox(false);
       return;
     }
     
-    // Create a new prediction object with the first class as default
     const defaultClassName = CLASS_NAMES[0];
     const newPrediction = {
       xmin,
@@ -203,22 +189,19 @@ function ImageAnalysis() {
       xmax,
       ymax,
       name: defaultClassName,
-      class: 0, // Default to first class
+      class: 0,
       confidence: 0.5,
       isModified: true,
       isNew: true
     };
     
-    // Add the new box to predictions
     const newIndex = predictions.length;
     setPredictions([...predictions, newPrediction]);
     setShowDrawingBox(false);
     
-    // Start editing the newly added box
     setTimeout(() => startEditing(newIndex, newPrediction), 100);
   };
 
-  // Remove a bounding box
   const removeBox = (index) => {
     setPredictions(predictions.filter((_, i) => i !== index));
     if (editingItem === index) {
@@ -226,7 +209,6 @@ function ImageAnalysis() {
     }
   };
 
-  // Mouse event handlers for drawing
   const handleMouseDown = (e) => {
     if (imageUrl && 
         !analyzing && 
@@ -261,7 +243,6 @@ function ImageAnalysis() {
     }
   };
 
-  // Calculate dimensions for the drawing box
   const drawingBoxStyle = {
     position: "absolute",
     left: Math.min(drawStart.x, drawEnd.x),
