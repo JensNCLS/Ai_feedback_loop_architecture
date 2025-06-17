@@ -20,3 +20,4 @@ redis
 mlflow
 minio==7.1.14
 dvc
+scikit-learn>=1.0.0

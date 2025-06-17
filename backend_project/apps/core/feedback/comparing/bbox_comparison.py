@@ -1,3 +1,21 @@
+import math
+import numpy as np
+from ...logging.logging import get_logger
+
+logger = get_logger()
+
+def log_method_call(func):
+    def wrapper(*args, **kwargs):
+        logger.info(f"Calling {func.__name__} with arguments: {args} and kwargs: {kwargs}")
+        try:
+            result = func(*args, **kwargs)
+            logger.info(f"Finished {func.__name__} with result: {result}")
+            return result
+        except Exception as e:
+            logger.error(f"Error in {func.__name__}: {e}")
+            raise
+    return wrapper
+
 def calculate_iou(box1, box2):
 
     # Calculate coordinates of intersection
@@ -24,10 +42,10 @@ def calculate_iou(box1, box2):
 
 def calculate_ciou(box1, box2):
 
-    import math
-    
     # Calculate IoU
     iou = calculate_iou(box1, box2)
+
+    logger.debug(f"IOU: {iou}")
     
     # Width and height of boxes (for aspect ratio term)
     w1 = box1['xmax'] - box1['xmin']
@@ -72,8 +90,6 @@ def calculate_ciou(box1, box2):
     }
 
 def compare_predictions(ai_predictions, feedback_predictions, threshold=0.5):
-    
-    import numpy as np
     
     matches = [] 
     missed_detections = [] 
@@ -137,8 +153,7 @@ def compare_predictions(ai_predictions, feedback_predictions, threshold=0.5):
     
     # Determine if the image needs review
     needs_review = (len(significant_differences) > 0 or
-                   len(missed_detections) > 0 or
-                   len(false_positives) > 0)
+                   len(missed_detections) > 0)
     
     return {
         'matches': matches,
@@ -201,7 +216,6 @@ def flag_for_review_check(analyzed_image, feedback_image, threshold=0.5, confide
     comparison_result['needs_review'] = (
         len(comparison_result['significant_differences']) > 0 or
         len(comparison_result['missed_detections']) > 0 or
-        len(comparison_result['false_positives']) > 0 or
         len(classification_differences) > 0 or
         len(high_confidence_removals) > 0
     )

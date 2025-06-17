@@ -5,3 +5,5 @@
 /images_first_reviewer
 /labels_first_reviewer
 /dataset_first_reviewer.yaml
+/kfolds
+/kfolds_first_reviewer

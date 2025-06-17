@@ -27,6 +27,29 @@ stages:
     outs:
     - media/runs/train
 
+  # K-fold cross-validation pipeline
+  kfold_data_formatting:
+    cmd: python manage.py format_training_data_kfold --k=7
+    deps:
+    - apps/core/management/commands/format_training_data_kfold.py
+    - apps/core/retraining/data_formatting.py
+    - media/raw
+    outs:
+    - media/kfolds
+  kfold_model_training:
+    cmd: >
+      python manage.py train_model_kfold 
+      --k=7 
+      --epochs=20 
+      --batch-size=4
+      --img-size=640
+      --patience=5
+    deps:
+    - apps/core/management/commands/train_model_kfold.py
+    - apps/core/retraining/retraining.py
+    - media/kfolds
+    outs:
+    - media/runs/kfold
  
   first_reviewer_data_collection:
     cmd: python manage.py fetch_first_reviewer_data
@@ -54,3 +77,27 @@ stages:
     - media/dataset.yaml
     outs:
     - media/runs/train_first_reviewer
+
+  # First reviewer K-fold cross-validation pipeline
+  first_reviewer_kfold_data_formatting:
+    cmd: python manage.py format_first_reviewer_data_kfold --k=7
+    deps:
+    - apps/core/management/commands/format_first_reviewer_data_kfold.py
+    - apps/core/retraining/data_formatting_first_reviewer.py
+    - media/raw_first_reviewer
+    outs:
+    - media/kfolds_first_reviewer
+  first_reviewer_kfold_model_training:
+    cmd: >
+      python manage.py train_first_reviewer_model_kfold 
+      --k=7 
+      --epochs=20 
+      --batch-size=4 
+      --img-size=640
+      --patience=5
+    deps:
+    - apps/core/management/commands/train_first_reviewer_model_kfold.py
+    - apps/core/retraining/retraining_first_reviewer.py
+    - media/kfolds_first_reviewer
+    outs:
+    - media/runs/kfold_first_reviewer

@@ -9,13 +9,13 @@ stages:
       size: 590
     - path: apps/core/retraining/data_collection.py
       hash: md5
-      md5: 98152ab01af8d57180a982f3c3270ffb
-      size: 2544
+      md5: b92fc9990ab8156bb9673c510013c493
+      size: 2477
     outs:
     - path: media/raw
       hash: md5
-      md5: 4498cff5c96a4c246ff02a96e37789ff.dir
-      size: 40426
+      md5: 192c45b5c7f58a28eb7c05d82315c70b.dir
+      size: 179269
       nfiles: 1
   data_formatting:
     cmd: python manage.py format_training_data
@@ -84,13 +84,13 @@ stages:
       size: 674
     - path: apps/core/retraining/data_collection_first_reviewer.py
       hash: md5
-      md5: ab8eaf97d5cc9de79434ec4827ec5d30
-      size: 2663
+      md5: 6082d013a3b2303f2bc54b6817b406bf
+      size: 2596
     outs:
     - path: media/raw_first_reviewer
       hash: md5
-      md5: 77d1a22f6da38655638d57c71898cc1a.dir
-      size: 9531
+      md5: 8589a2edd51b51e35341c8c83829d172.dir
+      size: 185537
       nfiles: 1
   first_reviewer_data_formatting:
     cmd: python manage.py format_first_reviewer_data
@@ -150,3 +150,93 @@ stages:
       md5: 49f185ffcfea862e6a344531a526d65b.dir
       size: 32317339
       nfiles: 18
+  kfold_data_formatting:
+    cmd: python manage.py format_training_data_kfold --k=7
+    deps:
+    - path: apps/core/management/commands/format_training_data_kfold.py
+      hash: md5
+      md5: 687e903f32e9e3ccf7878ba8e2dfc419
+      size: 920
+    - path: apps/core/retraining/data_formatting.py
+      hash: md5
+      md5: 223fbade283411b51492ad40bde01cf1
+      size: 14409
+    - path: media/raw
+      hash: md5
+      md5: 192c45b5c7f58a28eb7c05d82315c70b.dir
+      size: 179269
+      nfiles: 1
+    outs:
+    - path: media/kfolds
+      hash: md5
+      md5: d7175b7d86ba0523ec8c6d55c77e9d80.dir
+      size: 3123487185
+      nfiles: 927
+  kfold_model_training:
+    cmd: "python manage.py train_model_kfold  --k=7  --epochs=20  --batch-size=4 --img-size=640
+      --patience=5\n"
+    deps:
+    - path: apps/core/management/commands/train_model_kfold.py
+      hash: md5
+      md5: d796b6029668efe86e5c5ba90d7ebe7c
+      size: 2540
+    - path: apps/core/retraining/retraining.py
+      hash: md5
+      md5: cf8eec8b7f44d13351167b707e8ee066
+      size: 21144
+    - path: media/kfolds
+      hash: md5
+      md5: 0a7fcfaa37b542268a6c37c9b675b519.dir
+      size: 3123627846
+      nfiles: 941
+    outs:
+    - path: media/runs/kfold
+      hash: md5
+      md5: 818184f88500bd3480e3f5a7555a8ae0.dir
+      size: 220709478
+      nfiles: 139
+  first_reviewer_kfold_data_formatting:
+    cmd: python manage.py format_first_reviewer_data_kfold --k=7
+    deps:
+    - path: apps/core/management/commands/format_first_reviewer_data_kfold.py
+      hash: md5
+      md5: 37b9c98ec9e9620ede85b972e878954f
+      size: 1024
+    - path: apps/core/retraining/data_formatting_first_reviewer.py
+      hash: md5
+      md5: b3b904f8074c3890826646f6e6bd6051
+      size: 14615
+    - path: media/raw_first_reviewer
+      hash: md5
+      md5: 8589a2edd51b51e35341c8c83829d172.dir
+      size: 185537
+      nfiles: 1
+    outs:
+    - path: media/kfolds_first_reviewer
+      hash: md5
+      md5: 3b42139fe34cb58578b875896bd76d8b.dir
+      size: 3224088065
+      nfiles: 953
+  first_reviewer_kfold_model_training:
+    cmd: "python manage.py train_first_reviewer_model_kfold  --k=7  --epochs=20  --batch-size=4\
+      \  --img-size=640 --patience=5\n"
+    deps:
+    - path: apps/core/management/commands/train_first_reviewer_model_kfold.py
+      hash: md5
+      md5: b72cc04343a1c79a50aa5225a419d4a1
+      size: 2653
+    - path: apps/core/retraining/retraining_first_reviewer.py
+      hash: md5
+      md5: 97bade1f1d769f9cff8a7c32e347acbd
+      size: 21029
+    - path: media/kfolds_first_reviewer
+      hash: md5
+      md5: 398c1f25aa25c997f1b4ad120d55db0e.dir
+      size: 3224241103
+      nfiles: 967
+    outs:
+    - path: media/runs/kfold_first_reviewer
+      hash: md5
+      md5: 8dd9de57bc71a03b3f82757c326afd91.dir
+      size: 221090386
+      nfiles: 141

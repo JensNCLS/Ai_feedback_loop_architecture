@@ -7,6 +7,7 @@ Developing a software architecture which allows implementation of a human-in-the
 - [Features](#features)
 - [Project Structure](#project-structure)
 - [Setup Instructions](#setup-instructions)
+- [Training & Evaluation](#training--evaluation)
 
 ## Overview
 
@@ -16,6 +17,7 @@ This project aims to create a robust architecture for AI systems that integrates
 
 - **Human-in-the-Loop Feedback**: Allows users to provide feedback on AI predictions to improve model performance.
 - **Model Retraining**: Automates the retraining process based on user feedback.
+- **K-fold Cross-validation**: Enables more robust model evaluation through k-fold cross-validation.
 - **(Partial) EU AI Act Compliance**: Ensures every process is logged.
 - **Architecture**: Modular design with separate services for backend, frontend, database, and AI models.
 - **MLflow Integration**: Tracks experiments, models, and artifacts.
@@ -56,5 +58,68 @@ This project aims to create a robust architecture for AI systems that integrates
  - **MLflow:** http://localhost:5001
  - **pgAdmin:** http://localhost:5050
  - **MiniO** http://localhost:9001
+
+## Training & Evaluation
+
+### Standard Training
+
+To run the standard model training pipeline using DVC:
+
+```zsh
+docker exec -it django-backend bash
+dvc repro data_collection data_formatting model_training
+```
+
+Or run individual steps:
+
+```zsh
+python manage.py fetch_training_data
+python manage.py format_training_data
+python manage.py train_model
+```
+
+### K-fold Cross-validation
+
+K-fold cross-validation allows for more robust model evaluation by:
+1. Splitting the dataset into K folds
+2. Training K different models, each using K-1 folds for training and 1 fold for validation
+3. Averaging metrics across all K folds to get a better estimate of model performance
+
+#### Using DVC Pipeline (Recommended)
+
+To run the K-fold cross-validation using DVC pipeline:
+
+```zsh
+docker exec -it django-backend bash
+
+# Run the complete pipeline (data collection, k-fold formatting, k-fold training)
+dvc repro data_collection kfold_data_formatting kfold_model_training
+
+# Optionally override parameters
+dvc repro kfold_model_training -p K_FOLDS=10,EPOCHS=30,BATCH_SIZE=16
+```
+
+You can customize parameters in params.yaml or override them on the command line. Available parameters:
+- `K_FOLDS`: Number of folds (default: 5)
+- `EPOCHS`: Number of training epochs (default: 20)
+- `BATCH_SIZE`: Batch size (default: 8)
+- `IMG_SIZE`: Image size (default: 640)
+- `PATIENCE`: Early stopping patience (default: 5)
+
+#### Using Shell Script (Alternative)
+
+Alternatively, you can use the shell script:
+
+```zsh
+docker exec -it django-backend bash
+./run_kfold_cv.sh --k=5 --epochs=20 --batch-size=8 --img-size=640
+```
+
+### Results
+
+K-fold cross-validation results will be stored in:
+- `media/runs/kfold/` directory
+- `media/runs/kfold/kfold_results.csv` file contains metrics for each fold
+- MLflow dashboard will show results for each fold and average metrics
 
 
